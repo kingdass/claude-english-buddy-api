@@ -1,4 +1,4 @@
-# english-coach
+# claude-english-buddy
 
 English language coach for non-native speakers using Claude Code. Auto-corrects prompts via UserPromptSubmit hook, tracks corrections, generates daily reports.
 
@@ -14,7 +14,7 @@ commands/
 agents/
   writing-reviewer.md   Deep English text reviewer (sonnet, green)
 skills/
-  english-coach/
+  claude-english-buddy/
     writing-guide/
       SKILL.md          English patterns for developers
 hooks/
@@ -47,7 +47,7 @@ All modes inject corrected/translated text into `additionalContext` so Claude ac
 
 ### State storage
 
-Correction history stored as JSONL in `$CLAUDE_PLUGIN_DATA/english-coach/history/YYYY-MM-DD.jsonl`. One line per correction event:
+Correction history stored as JSONL in `$CLAUDE_PLUGIN_DATA/claude-english-buddy/history/YYYY-MM-DD.jsonl`. One line per correction event:
 
 ```json
 {"ts":"...","mode":"correct","original":"...","corrected":"...","annotations":"(...)","session":"..."}
@@ -57,7 +57,7 @@ Clean prompts logged as `{"mode":"clean"}` for accurate rate calculation.
 
 ### Config resolution
 
-Priority: project (`.english-coach.json`) > global (`~/.claude/hooks/prompt_coach.json`) > defaults.
+Priority: project (`.claude-english-buddy.json`) > global (`~/.claude/hooks/prompt_coach.json`) > defaults.
 
 ### Testing
 

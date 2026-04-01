@@ -23,7 +23,7 @@ $ARGUMENTS
 
 ### Step 2: Show current config
 
-Read both global config (`~/.claude/hooks/prompt_coach.json`) and project config (`.english-coach.json` in cwd). Display merged result:
+Read both global config (`~/.claude/hooks/prompt_coach.json`) and project config (`.claude-english-buddy.json` in cwd). Display merged result:
 
 ```markdown
 # English Coach Config
@@ -48,18 +48,18 @@ Read both global config (`~/.claude/hooks/prompt_coach.json`) and project config
 ## Config Files
 
 - Global: `~/.claude/hooks/prompt_coach.json`
-- Project: `.english-coach.json` (in project root)
+- Project: `.claude-english-buddy.json` (in project root)
 - Priority: project > global > defaults
 ```
 
 ### Step 3: Set config value
 
-If `--set` was used, update the project config file (`.english-coach.json` in cwd):
+If `--set` was used, update the project config file (`.claude-english-buddy.json` in cwd):
 
 ```bash
 node -e "
   import fs from 'fs';
-  const file = '.english-coach.json';
+  const file = '.claude-english-buddy.json';
   const config = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
   config['{key}'] = {value};
   fs.writeFileSync(file, JSON.stringify(config, null, 2) + '\n');

@@ -6,4 +6,4 @@ tmp/
 *~
 .env
 .env.*
-.english-coach.json
+.claude-english-buddy.json

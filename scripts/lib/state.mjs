@@ -1,13 +1,13 @@
 // Correction history — persists every correction for trend analysis and reports.
-// Storage: $CLAUDE_PLUGIN_DATA/english-coach/history/YYYY-MM-DD.jsonl
+// Storage: $CLAUDE_PLUGIN_DATA/claude-english-buddy/history/YYYY-MM-DD.jsonl
 
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 
 const PLUGIN_DATA_ENV = "CLAUDE_PLUGIN_DATA";
-const FALLBACK_DIR = path.join(os.tmpdir(), "english-coach");
-const CONFIG_NAME = ".english-coach.json";
+const FALLBACK_DIR = path.join(os.tmpdir(), "claude-english-buddy");
+const CONFIG_NAME = ".claude-english-buddy.json";
 
 function getDataDir() {
   const pluginData = process.env[PLUGIN_DATA_ENV];

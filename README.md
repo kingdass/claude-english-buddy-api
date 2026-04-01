@@ -1,4 +1,4 @@
-# english-coach
+# claude-english-buddy
 
 English language coach for non-native speakers who use Claude Code daily.
 
@@ -12,7 +12,7 @@ You're not getting worse at English. You're losing the signal that would make yo
 
 ## The Solution
 
-english-coach restores the feedback loop. It sits between you and Claude, silently correcting your prompts and showing you what was wrong — every time, automatically, with zero friction.
+claude-english-buddy restores the feedback loop. It sits between you and Claude, silently correcting your prompts and showing you what was wrong — every time, automatically, with zero friction.
 
 ```
 You type:    "refactor the autentication modul, its got too many responsibilties"
@@ -59,22 +59,22 @@ Four modes, one hook, zero friction:
 
 ```bash
 /plugin marketplace add xiaolai/claude-plugin-marketplace
-/plugin install english-coach@xiaolai
+/plugin install claude-english-buddy@xiaolai
 ```
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `/english-coach:today` | Today's correction report — mistakes, patterns, lessons, trend |
-| `/english-coach:stats` | Long-term trends — error rate over weeks, improvement trajectory |
-| `/english-coach:mistakes` | All-time recurring mistakes — your blind spots |
-| `/english-coach:config` | Configure language, strictness, domain terms |
-| `/english-coach:review` | Deep review of any text (docs, PRs, emails) |
+| `/claude-english-buddy:today` | Today's correction report — mistakes, patterns, lessons, trend |
+| `/claude-english-buddy:stats` | Long-term trends — error rate over weeks, improvement trajectory |
+| `/claude-english-buddy:mistakes` | All-time recurring mistakes — your blind spots |
+| `/claude-english-buddy:config` | Configure language, strictness, domain terms |
+| `/claude-english-buddy:review` | Deep review of any text (docs, PRs, emails) |
 
 ## Daily Report
 
-The most powerful feature. Run `/english-coach:today` at the end of your day:
+The most powerful feature. Run `/claude-english-buddy:today` at the end of your day:
 
 ```markdown
 # Today's Language Report — 2026-04-01
@@ -109,7 +109,7 @@ You're improving. Error rate down 37% in 3 weeks.
 
 ## Configuration
 
-### Project config (`.english-coach.json`)
+### Project config (`.claude-english-buddy.json`)
 
 ```json
 {

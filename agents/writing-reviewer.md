@@ -15,7 +15,7 @@ model: sonnet
 color: green
 tools: Read, Glob, Grep
 skills:
-  - english-coach:writing-guide
+  - claude-english-buddy:writing-guide
 ---
 
 ## Your Mission
