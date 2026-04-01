@@ -3,8 +3,8 @@
 // Also injects summary_language instruction when configured.
 
 import fs from "node:fs";
-import process from "node:process";
 import { spawnSync } from "node:child_process";
+import process from "node:process";
 
 import { detectMode } from "./lib/detect.mjs";
 import { logCorrection, logClean, resolveConfig } from "./lib/state.mjs";
@@ -18,21 +18,39 @@ function emit(obj) {
 }
 
 function callHaiku(systemPrompt, userText) {
-  // Use CLAUDE_COACH_TOKEN if set, otherwise fall back to current session auth
-  const token = process.env.CLAUDE_COACH_TOKEN || process.env.CLAUDE_CODE_OAUTH_TOKEN || "";
-  const env = { ...process.env };
-  if (token) {
-    env.ANTHROPIC_API_KEY = "";
-    env.CLAUDE_CODE_OAUTH_TOKEN = token;
-  }
-  const result = spawnSync("claude", ["-p", "--model", "haiku", `${systemPrompt}\n\nUser's text:\n${userText}`], {
-    encoding: "utf8",
-    timeout: 45_000,
-    env,
+  // Resolve API key: CLAUDE_COACH_API_KEY > CLAUDE_CODE_OAUTH_TOKEN > ANTHROPIC_API_KEY
+  // Note: claude CLI deadlocks when spawned inside hooks, so we call the API directly via curl.
+  // CLAUDE_CODE_OAUTH_TOKEN (session OAuth) works as x-api-key for subscription users.
+  const apiKey = process.env.CLAUDE_COACH_API_KEY || process.env.CLAUDE_CODE_OAUTH_TOKEN || process.env.ANTHROPIC_API_KEY || "";
+  if (!apiKey) return null;
+
+  const body = JSON.stringify({
+    model: "claude-haiku-4-5-20251001",
+    max_tokens: 1024,
+    system: systemPrompt,
+    messages: [{ role: "user", content: userText }],
   });
 
+  // Synchronous HTTP via curl — can't use claude CLI (deadlocks inside hooks)
+  const result = spawnSync("curl", [
+    "-s", "--max-time", "30",
+    "https://api.anthropic.com/v1/messages",
+    "-H", "content-type: application/json",
+    "-H", `x-api-key: ${apiKey}`,
+    "-H", "anthropic-version: 2023-06-01",
+    "-d", body,
+  ], { encoding: "utf8", timeout: 35_000 });
+
   if (result.error || result.status !== 0) return null;
-  return (result.stdout || "").trim();
+
+  try {
+    const response = JSON.parse(result.stdout);
+    if (response.error) return null;
+    const text = response.content?.[0]?.text || "";
+    return text.trim() || null;
+  } catch {
+    return null;
+  }
 }
 
 const SYSTEM_CORRECT = `You are an English language coach for a non-native speaker who uses AI coding tools daily.
