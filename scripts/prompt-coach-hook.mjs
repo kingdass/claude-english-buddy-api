@@ -18,10 +18,9 @@ function emit(obj) {
 }
 
 function callHaiku(systemPrompt, userText) {
-  // Resolve API key: CLAUDE_COACH_API_KEY > CLAUDE_CODE_OAUTH_TOKEN > ANTHROPIC_API_KEY
+  // Use session OAuth token as API key — works for both subscription and API key users.
   // Note: claude CLI deadlocks when spawned inside hooks, so we call the API directly via curl.
-  // CLAUDE_CODE_OAUTH_TOKEN (session OAuth) works as x-api-key for subscription users.
-  const apiKey = process.env.CLAUDE_COACH_API_KEY || process.env.CLAUDE_CODE_OAUTH_TOKEN || process.env.ANTHROPIC_API_KEY || "";
+  const apiKey = process.env.CLAUDE_CODE_OAUTH_TOKEN || process.env.ANTHROPIC_API_KEY || "";
   if (!apiKey) return null;
 
   const body = JSON.stringify({
