@@ -23,7 +23,7 @@ $ARGUMENTS
 
 ### Step 2: Show current config
 
-Read both global config (`~/.claude/hooks/prompt_coach.json`) and project config (`.claude-english-buddy.json` in cwd). Display merged result:
+Read project config (`.claude-english-buddy.json` in cwd) and plugin data config (`$CLAUDE_PLUGIN_DATA/claude-english-buddy/config.json` if it exists). Display merged result:
 
 ```markdown
 # English Coach Config
@@ -47,9 +47,9 @@ Read both global config (`~/.claude/hooks/prompt_coach.json`) and project config
 
 ## Config Files
 
-- Global: `~/.claude/hooks/prompt_coach.json`
+- Plugin data: `$CLAUDE_PLUGIN_DATA/claude-english-buddy/config.json`
 - Project: `.claude-english-buddy.json` (in project root)
-- Priority: project > global > defaults
+- Priority: project > plugin data > defaults
 ```
 
 ### Step 3: Set config value

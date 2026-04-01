@@ -18,15 +18,17 @@ function emit(obj) {
 }
 
 function callHaiku(systemPrompt, userText) {
-  const token = process.env.CLAUDE_COACH_TOKEN;
+  // Use CLAUDE_COACH_TOKEN if set, otherwise fall back to current session auth
+  const token = process.env.CLAUDE_COACH_TOKEN || process.env.CLAUDE_CODE_OAUTH_TOKEN || "";
+  const env = { ...process.env };
+  if (token) {
+    env.ANTHROPIC_API_KEY = "";
+    env.CLAUDE_CODE_OAUTH_TOKEN = token;
+  }
   const result = spawnSync("claude", ["-p", "--model", "haiku", `${systemPrompt}\n\nUser's text:\n${userText}`], {
     encoding: "utf8",
     timeout: 45_000,
-    env: {
-      ...process.env,
-      ANTHROPIC_API_KEY: "",
-      CLAUDE_CODE_OAUTH_TOKEN: token || "",
-    },
+    env,
   });
 
   if (result.error || result.status !== 0) return null;

@@ -13,41 +13,30 @@ $ARGUMENTS
 
 ### Step 1: Load all-time patterns
 
+Parse `$ARGUMENTS` for `--top N` (default: 20).
+
 ```bash
 node -e "
-  import { readLastNDays } from '${CLAUDE_PLUGIN_ROOT}/scripts/lib/state.mjs';
-  const records = readLastNDays(365);
-  const patterns = {};
-  for (const r of records) {
-    if (!r.annotations) continue;
-    const fixes = r.annotations.replace(/^\(/, '').replace(/\)$/, '').split(';').map(s => s.trim()).filter(Boolean);
-    for (const fix of fixes) {
-      const parts = fix.split('>');
-      if (parts.length === 2) {
-        const key = parts[0].trim() + '>' + parts[1].trim();
-        patterns[key] = (patterns[key] || 0) + 1;
-      }
-    }
-  }
-  const sorted = Object.entries(patterns).map(([k, c]) => ({ pattern: k, count: c })).sort((a, b) => b.count - a.count);
-  const total = records.length;
-  const corrections = records.filter(r => r.mode !== 'clean').length;
-  console.log(JSON.stringify({ total, corrections, patterns: sorted }));
-"
+  const args = process.argv.slice(1).join(' ');
+  const match = args.match(/--top\s+(\d+)/);
+  const topN = match ? parseInt(match[1]) : 20;
+  const { periodStats } = await import('${CLAUDE_PLUGIN_ROOT}/scripts/lib/stats.mjs');
+  const stats = periodStats(365);
+  stats.patterns = stats.patterns.slice(0, topN);
+  console.log(JSON.stringify({ topN, ...stats }));
+" -- $ARGUMENTS
 ```
 
-### Step 2: Parse arguments
+If the script fails, read JSONL files directly via Glob + Read and extract patterns manually.
 
-Default top N: 20. Override with `--top N`.
-
-### Step 3: Generate report
+### Step 2: Generate report
 
 ```markdown
 # Recurring Mistakes
 
 **Period**: All time ({total} prompts, {corrections} corrections)
 
-## Top {N} Patterns
+## Top {topN} Patterns
 
 | # | You Write | Should Be | Times | Category |
 |---|-----------|-----------|------:|----------|

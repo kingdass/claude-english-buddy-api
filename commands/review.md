@@ -21,6 +21,8 @@ $ARGUMENTS
 
 ### Step 2: Review
 
+For texts over 5,000 words, suggest breaking into sections and reviewing one section at a time.
+
 Analyze the text for:
 
 1. **Grammar & Mechanics** — spelling, punctuation, tense, agreement, articles

@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 // SessionEnd hook — show a brief session summary of corrections made.
 
-import fs from "node:fs";
 import process from "node:process";
 import { readToday } from "./lib/state.mjs";
 

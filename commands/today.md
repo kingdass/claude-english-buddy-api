@@ -4,57 +4,54 @@ description: "Today's language report — corrections made, recurring mistakes, 
 
 ## Workflow
 
-### Step 1: Load today's correction history
+### Step 1: Load today's stats and comparison data
 
 ```bash
 node -e "
-  import { todayStats } from '${CLAUDE_PLUGIN_ROOT}/scripts/lib/stats.mjs';
-  console.log(JSON.stringify(todayStats()));
-"
-```
-
-Parse the JSON output. It contains: `date`, `total`, `corrections`, `clean`, `translations`, `refinements`, `errorRate`, `patterns` (array of {original, corrected, count}), `records` (array of correction records).
-
-If `total` is 0: respond "No prompts processed today yet." and STOP.
-
-### Step 2: Load comparison data
-
-```bash
-node -e "
-  import { todayStats, periodStats, weeklyTrend } from '${CLAUDE_PLUGIN_ROOT}/scripts/lib/stats.mjs';
+  const { todayStats, periodStats, weeklyTrend } = await import('${CLAUDE_PLUGIN_ROOT}/scripts/lib/stats.mjs');
+  const { readDay } = await import('${CLAUDE_PLUGIN_ROOT}/scripts/lib/state.mjs');
   const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
   const yd = yesterday.toISOString().slice(0, 10);
-  import { readDay } from '${CLAUDE_PLUGIN_ROOT}/scripts/lib/state.mjs';
   const yRecords = readDay(yd);
   const yTotal = yRecords.length;
   const yCorrections = yRecords.filter(r => r.mode !== 'clean').length;
   const yRate = yTotal > 0 ? Math.round(yCorrections / yTotal * 100) : 0;
-  const week = periodStats(7);
-  const trend = weeklyTrend(4);
-  console.log(JSON.stringify({ yesterday: { total: yTotal, corrections: yCorrections, errorRate: yRate }, week, trend }));
+  console.log(JSON.stringify({
+    today: todayStats(),
+    yesterday: { total: yTotal, corrections: yCorrections, errorRate: yRate },
+    week: periodStats(7),
+    trend: weeklyTrend(4),
+  }));
 "
 ```
 
-### Step 3: Generate report
+Parse the JSON output. If `today.total` is 0: respond "No prompts processed today yet." and STOP.
+
+If the script fails (module not found, node error, etc.), read the JSONL files directly:
+1. Use Glob to find `$CLAUDE_PLUGIN_DATA/claude-english-buddy/history/*.jsonl`
+2. Read today's file with Read tool
+3. Count records manually and build the report from raw data
+
+### Step 2: Generate report
 
 ```markdown
-# Today's Language Report — {date}
+# Today's Language Report — {today.date}
 
 ## Overview
 
 | Metric | Today | Yesterday | 7-day avg |
 |--------|------:|----------:|----------:|
-| Prompts | {total} | {yesterday.total} | {week.total / 7 rounded} |
-| Corrections | {corrections} ({errorRate}%) | {yesterday.corrections} ({yesterday.errorRate}%) | {week.corrections / 7 rounded} ({week.errorRate}%) |
-| Translations | {translations} | — | — |
-| Clean prompts | {clean} | — | — |
-| Refinements (::) | {refinements} | — | — |
+| Prompts | {today.total} | {yesterday.total} | {week.total / 7 rounded} |
+| Corrections | {today.corrections} ({today.errorRate}%) | {yesterday.corrections} ({yesterday.errorRate}%) | {week.corrections / 7 rounded} ({week.errorRate}%) |
+| Translations | {today.translations} | — | — |
+| Clean prompts | {today.clean} | — | — |
+| Refinements (::) | {today.refinements} | — | — |
 
 ## Today's Corrections
 
 | # | You Wrote | Corrected | Pattern |
 |---|-----------|-----------|---------|
-{for each record in records: | N | original | corrected | annotations | }
+{for each record in today.records: | N | original | corrected | annotations |}
 
 ## Recurring Patterns
 

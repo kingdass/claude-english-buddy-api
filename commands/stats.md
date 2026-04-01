@@ -11,26 +11,23 @@ $ARGUMENTS
 
 ## Workflow
 
-### Step 1: Parse arguments
+### Step 1: Parse arguments and load stats
 
-| Input | Period |
-|-------|--------|
-| (empty) | Last 30 days |
-| `--days N` | Last N days |
-
-### Step 2: Load stats
+Parse `$ARGUMENTS` for `--days N` (default: 30).
 
 ```bash
 node -e "
-  import { periodStats, weeklyTrend } from '${CLAUDE_PLUGIN_ROOT}/scripts/lib/stats.mjs';
-  const days = parseInt('${DAYS}') || 30;
-  const stats = periodStats(days);
-  const trend = weeklyTrend(Math.ceil(days / 7));
-  console.log(JSON.stringify({ stats, trend }));
-"
+  const args = process.argv.slice(1).join(' ');
+  const match = args.match(/--days\s+(\d+)/);
+  const days = match ? parseInt(match[1]) : 30;
+  const { periodStats, weeklyTrend } = await import('${CLAUDE_PLUGIN_ROOT}/scripts/lib/stats.mjs');
+  console.log(JSON.stringify({ days, stats: periodStats(days), trend: weeklyTrend(Math.ceil(days / 7)) }));
+" -- $ARGUMENTS
 ```
 
-### Step 3: Generate report
+If the script fails, read JSONL files directly via Glob + Read and compute stats manually.
+
+### Step 2: Generate report
 
 ```markdown
 # Language Stats — Last {days} Days
@@ -39,23 +36,23 @@ node -e "
 
 | Metric | Value |
 |--------|------:|
-| Total prompts | {total} |
-| Corrections made | {corrections} ({errorRate}%) |
-| Translations | {translations} |
-| Refinements | {refinements} |
-| Clean prompts | {clean} ({100 - errorRate}%) |
+| Total prompts | {stats.total} |
+| Corrections made | {stats.corrections} ({stats.errorRate}%) |
+| Translations | {stats.translations} |
+| Refinements | {stats.refinements} |
+| Clean prompts | {stats.clean} ({100 - stats.errorRate}%) |
 
 ## Top 10 Recurring Mistakes
 
 | # | You Write | Should Be | Times |
 |---|-----------|-----------|------:|
-{for each of top 10 patterns: | N | original | corrected | count |}
+{for each of top 10 stats.patterns: | N | original | corrected | count |}
 
 ## Weekly Trend
 
 | Week | Prompts | Corrections | Error Rate |
 |------|--------:|------------:|-----------:|
-{for each week: | start — end | total | corrections | errorRate% |}
+{for each week in trend: | start — end | total | corrections | errorRate% |}
 
 ## Analysis
 
