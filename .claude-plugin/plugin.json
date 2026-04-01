@@ -1,0 +1,22 @@
+{
+  "name": "english-coach",
+  "version": "0.1.0",
+  "description": "English language coaching for non-native speakers using AI coding tools. Corrects spelling, grammar, punctuation, and word choice while preserving technical intent.",
+  "author": {
+    "name": "xiaolai"
+  },
+  "license": "MIT",
+  "keywords": [
+    "english",
+    "language",
+    "coaching",
+    "grammar",
+    "writing",
+    "non-native",
+    "correction"
+  ],
+  "category": "developer-tools",
+  "commands": [],
+  "agents": [],
+  "hooks": []
+}
