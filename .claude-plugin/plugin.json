@@ -16,7 +16,26 @@
     "correction"
   ],
   "category": "developer-tools",
-  "commands": [],
-  "agents": [],
-  "hooks": []
+  "commands": [
+    {
+      "name": "check",
+      "description": "Check a prompt for English errors"
+    },
+    {
+      "name": "analyze",
+      "description": "Get detailed analysis of English errors"
+    }
+  ],
+  "agents": [
+    {
+      "name": "coach-engine",
+      "description": "Core English language correction engine"
+    }
+  ],
+  "skills": [
+    {
+      "name": "error-analyzer",
+      "description": "Analyze error patterns and provide feedback"
+    }
+  ]
 }
