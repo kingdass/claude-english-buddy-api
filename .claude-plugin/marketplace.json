@@ -1,24 +1,34 @@
 {
-  "name": "english-coach",
-  "source": {
-    "source": "github",
-    "repo": "xiaolai/english-coach-for-claude"
-  },
-  "description": "English language coaching for non-native speakers using AI coding tools. Corrects spelling, grammar, punctuation, and word choice while preserving technical intent.",
-  "version": "0.1.0",
-  "author": {
+  "name": "xiaolai",
+  "owner": {
     "name": "xiaolai"
   },
-  "repository": "https://github.com/xiaolai/english-coach-for-claude",
-  "license": "MIT",
-  "keywords": [
-    "english",
-    "language",
-    "coaching",
-    "grammar",
-    "writing",
-    "non-native",
-    "correction"
-  ],
-  "category": "developer-tools"
+  "metadata": {
+    "description": "English language coach for non-native speakers"
+  },
+  "plugins": [
+    {
+      "name": "english-coach",
+      "source": {
+        "source": "github",
+        "repo": "xiaolai/english-coach-for-claude"
+      },
+      "description": "English language coach for non-native speakers — auto-corrects prompts, translates non-English, refines with :: prefix, tracks improvement over time",
+      "version": "0.2.0",
+      "author": {
+        "name": "xiaolai"
+      },
+      "repository": "https://github.com/xiaolai/english-coach-for-claude",
+      "license": "MIT",
+      "keywords": [
+        "english",
+        "language",
+        "coaching",
+        "grammar",
+        "translation",
+        "non-native"
+      ],
+      "category": "developer-tools"
+    }
+  ]
 }

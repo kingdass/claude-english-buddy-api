@@ -1,91 +1,179 @@
-# English Coach for Claude Code
+# english-coach
 
-A Claude Code plugin that provides real-time English language coaching for non-native speakers.
+English language coach for non-native speakers who use Claude Code daily.
 
-## Features
+## The Problem
 
-- **Spelling correction** — Catch and fix typos and misspellings
-- **Grammar fixing** — Correct tense, agreement, and sentence structure
-- **Punctuation validation** — Fix missing or incorrect punctuation
-- **Word choice improvement** — Suggest better word selection and phrasing
-- **Intent preservation** — Never changes your meaning or technical references
-- **Code-aware** — Respects technical terms, variable names, and tool names
+LLMs understand broken English perfectly. They never correct you. They never push back. They just... comply.
 
-## Installation
+This means every typo, every grammar mistake, every awkward phrasing you type goes unchallenged. Over months of daily AI interaction, bad patterns calcify. Your English doesn't improve — it quietly degrades, because the feedback loop that would catch your mistakes no longer exists.
 
-Install the plugin from the xiaolai marketplace:
+You're not getting worse at English. You're losing the signal that would make you better.
+
+## The Solution
+
+english-coach restores the feedback loop. It sits between you and Claude, silently correcting your prompts and showing you what was wrong — every time, automatically, with zero friction.
+
+```
+You type:    "refactor the autentication modul, its got too many responsibilties"
+
+You see:     Refactor the authentication module. It has too many responsibilities.
+             (autentication>authentication; modul>module; its got>it has; responsibilties>responsibilities)
+
+Claude sees: the corrected version, responds normally.
+```
+
+When your prompt is clean — silence. No noise. Silence means correct.
+
+Over weeks, you start noticing fewer corrections. That's the feedback loop working.
+
+## How It Works
+
+```mermaid
+flowchart TD
+    A["You type a prompt"] --> B{Language?}
+    B -->|"English"| C{Errors?}
+    B -->|"Non-English"| D["Translate to English"]
+    B -->|":: prefix"| E["Refine into precise prompt"]
+    C -->|"Yes"| F["Correct + show fixes"]
+    C -->|"No"| G["Pass through silently"]
+    D --> H["Show translation"]
+    E --> I["Show refined version"]
+    F --> J["Claude acts on corrected version"]
+    G --> J
+    H --> J
+    I --> J
+    J --> K["You see corrections + Claude's response"]
+```
+
+Four modes, one hook, zero friction:
+
+| Mode | Trigger | What Happens |
+|------|---------|-------------|
+| **Correct** | English prompt with errors | Fixes typos/grammar, shows what changed |
+| **Translate** | Non-English detected | Translates to English, shows translation |
+| **Refine** | `::` prefix | Rewrites into a precise, structured prompt |
+| **Summarize** | `summary_language` configured | Claude appends native-language summary |
+
+## Install
 
 ```bash
-claude plugin install english-coach@xiaolai
+/plugin marketplace add xiaolai/claude-plugin-marketplace
+/plugin install english-coach@xiaolai
 ```
 
-## Usage
+## Commands
 
-### Check a prompt
+| Command | Description |
+|---------|-------------|
+| `/english-coach:today` | Today's correction report — mistakes, patterns, lessons, trend |
+| `/english-coach:stats` | Long-term trends — error rate over weeks, improvement trajectory |
+| `/english-coach:mistakes` | All-time recurring mistakes — your blind spots |
+| `/english-coach:config` | Configure language, strictness, domain terms |
+| `/english-coach:review` | Deep review of any text (docs, PRs, emails) |
 
-Ask the plugin to review and correct your English:
+## Daily Report
 
+The most powerful feature. Run `/english-coach:today` at the end of your day:
+
+```markdown
+# Today's Language Report — 2026-04-01
+
+## Overview
+
+| Metric | Today | Yesterday | 7-day avg |
+|--------|------:|----------:|----------:|
+| Prompts | 34 | 41 | 37 |
+| Corrections | 8 (24%) | 14 (34%) | 11 (30%) |
+| Clean prompts | 24 (71%) | 27 (66%) | 25 (68%) |
+
+## Today's Corrections
+
+| # | You Wrote | Corrected | Pattern |
+|---|-----------|-----------|---------|
+| 1 | "its got too many" | "it has too many" | its vs it's |
+| 2 | "autentication" | "authentication" | spelling |
+| 3 | "the modul is" | "the module is" | spelling |
+| ...
+
+## Lessons of the Day
+
+1. **"who" vs "that"** — Use "who" for people, "that" for things.
+   Wrong: "the function who handles auth"
+   Right: "the function that handles auth"
+
+## Trend
+
+You're improving. Error rate down 37% in 3 weeks.
 ```
-@english-coach check: I want to refactor the autentication module. Its got to many responsibilties.
+
+## Configuration
+
+### Project config (`.english-coach.json`)
+
+```json
+{
+  "auto_correct": true,
+  "summary_language": "Chinese",
+  "strictness": "standard",
+  "domain_terms": ["Tailscale", "Headscale", "MagicDNS"]
+}
 ```
 
-The plugin returns:
+### Global config (`~/.claude/hooks/prompt_coach.json`)
 
+Same format. Project config overrides global.
+
+### Strictness Levels
+
+| Level | Behavior |
+|-------|----------|
+| `gentle` | Only fix clear errors. Accept informal English. |
+| `standard` | Fix errors + improve awkward phrasing. (default) |
+| `strict` | Fix everything + suggest more natural alternatives. |
+
+### Summary Language
+
+Set `summary_language` to any language name (`"Chinese"`, `"Japanese"`, `"Korean"`, `"Spanish"`, etc.) and Claude will append a brief summary in that language at the end of every response. Set `null` to disable.
+
+## Who This Is For
+
+- **Non-native English speakers** who use Claude Code daily and want to improve their English passively
+- **Developers** whose English is "good enough for LLMs" but not improving because LLMs never correct them
+- **Teams** where English is the working language but not everyone's first language
+- **Anyone** who types fast and makes typos they never notice because AI always understands them
+
+## What This Is NOT
+
+- Not a grammar checker for code (use a linter)
+- Not a translation service (though it translates when needed)
+- Not a writing tutor that interrupts your flow (corrections are non-blocking)
+
+The goal is not perfection. The goal is **visible progress** — seeing your error rate drop from 35% to 20% over a month, knowing which mistakes you keep making, and having a daily report that turns corrections into learning.
+
+## Architecture
+
+| Component | Purpose |
+|-----------|---------|
+| `UserPromptSubmit` hook | Auto-correct, translate, or refine every prompt |
+| `SessionEnd` hook | Brief session summary of corrections |
+| `/today` command | Daily language report with lessons |
+| `/stats` command | Long-term trends and improvement trajectory |
+| `/mistakes` command | All-time recurring error patterns |
+| `/config` command | Configure settings interactively |
+| `/review` command | Deep review of any text via writing-reviewer agent |
+| `writing-guide` skill | English patterns for developers |
+| `writing-reviewer` agent | Thorough text quality analysis |
+| `scripts/lib/state.mjs` | JSONL correction history per day |
+| `scripts/lib/detect.mjs` | Language detection (ASCII ratio) |
+| `scripts/lib/stats.mjs` | Trend analysis and pattern extraction |
+
+## Tests
+
+```bash
+npm test    # 22 tests covering detection, state, and stats
 ```
-I want to refactor the authentication module. It has too many responsibilities.
-(autentication>authentication; Its got>It has; to many>too many; responsibilties>responsibilities)
-```
-
-### Get coaching
-
-Enable automatic coaching on your prompts to improve over time:
-
-```
-@english-coach coach: Enable continuous feedback
-```
-
-## How it Works
-
-1. **Input**: Your prompt text
-2. **Analysis**: The plugin checks for spelling, grammar, punctuation, and word choice errors
-3. **Output**: Corrected text with a list of fixes applied
-4. **Learning**: Track your improvement over multiple prompts
-
-## Error Types Detected
-
-| Type | Examples |
-|------|----------|
-| Spelling | `autentication` → `authentication` |
-| Grammar | `its got` → `it has` |
-| Punctuation | Missing commas, periods, apostrophes |
-| Word choice | `to many` → `too many` |
-| Phrasing | `very much big` → `very large` |
-
-## What It Preserves
-
-- Technical terms: `database`, `API`, `microservice`
-- Code references: variable names, function names
-- Tool names: `Git`, `Docker`, `React`
-- Your writing style and intent
-- Document structure and organization
-
-## Performance
-
-- Tested with 1,263+ test cases
-- 99%+ accuracy on error detection
-- Sub-second response time
-
-## Privacy
-
-- Processes text locally within your Claude Code session
-- No data sent to external services
-- No logging of your prompts
-
-## Support
-
-For issues or suggestions, file an issue on GitHub:
-https://github.com/xiaolai/english-coach-for-claude/issues
 
 ## License
 
-MIT — See LICENSE file
+MIT

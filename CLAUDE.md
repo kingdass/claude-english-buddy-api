@@ -1,76 +1,66 @@
-# English Coach
+# english-coach
 
-A Claude Code plugin that provides real-time English language coaching for non-native speakers who use AI coding tools daily.
+English language coach for non-native speakers using Claude Code. Auto-corrects prompts via UserPromptSubmit hook, tracks corrections, generates daily reports.
 
-## Purpose
-
-Help non-native English speakers improve their writing by identifying and correcting errors in their prompts while preserving technical intent and code references.
-
-## Core Coaching Rules
-
-1. **Fix these error types:**
-   - Spelling errors (typos, misspellings)
-   - Grammar errors (tense, agreement, structure)
-   - Punctuation errors (missing/incorrect marks)
-   - Word choice errors (incorrect word selection, awkward phrasing)
-
-2. **Preserve these elements:**
-   - Technical terms and jargon
-   - Code references and variable names
-   - Tool names and command syntax
-   - User's intent and structure
-   - Original content organization
-
-3. **Never do this:**
-   - Restructure or reorganize content
-   - Expand or add new ideas
-   - Change technical terms
-   - Alter the user's voice or style beyond error correction
-
-## Output Format
-
-When coaching a prompt, produce exactly:
+## Project structure
 
 ```
-{Corrected prompt text}
-({original>corrected}; {original>corrected}; ... )
+commands/
+  today.md              /today — daily correction report with lessons
+  stats.md              /stats — long-term trends and improvement
+  mistakes.md           /mistakes — all-time recurring errors
+  config.md             /config — configure settings
+  review.md             /review — deep text review
+agents/
+  writing-reviewer.md   Deep English text reviewer (sonnet, green)
+skills/
+  english-coach/
+    writing-guide/
+      SKILL.md          English patterns for developers
+hooks/
+  hooks.json            UserPromptSubmit + SessionEnd hooks
+scripts/
+  prompt-coach-hook.mjs   Main hook — correct/translate/refine
+  session-end-hook.mjs    Session summary on exit
+  lib/
+    detect.mjs          Language detection (ASCII ratio heuristic)
+    state.mjs           Correction history (JSONL per day)
+    stats.mjs           Trend analysis and pattern extraction
+tests/
+  detect.test.mjs       Language detection tests
+  state.test.mjs        State persistence tests
+  stats.test.mjs        Stats computation tests
+package.json            Node.js project config
 ```
 
-If no errors found:
+## Conventions
+
+### Hook behavior
+
+The UserPromptSubmit hook has four modes:
+- **correct**: English with errors → fix and show corrections via `systemMessage`
+- **translate**: Non-English detected (ASCII ratio < 85%) → translate via `systemMessage`
+- **refine**: `::` prefix → rewrite into precise prompt via `systemMessage`
+- **skip**: slash commands, short prompts, code patterns → exit 0
+
+All modes inject corrected/translated text into `additionalContext` so Claude acts on the clean version. If `summary_language` is configured, the summary instruction is appended to `additionalContext` in all modes.
+
+### State storage
+
+Correction history stored as JSONL in `$CLAUDE_PLUGIN_DATA/english-coach/history/YYYY-MM-DD.jsonl`. One line per correction event:
+
+```json
+{"ts":"...","mode":"correct","original":"...","corrected":"...","annotations":"(...)","session":"..."}
 ```
-CLEAN
+
+Clean prompts logged as `{"mode":"clean"}` for accurate rate calculation.
+
+### Config resolution
+
+Priority: project (`.english-coach.json`) > global (`~/.claude/hooks/prompt_coach.json`) > defaults.
+
+### Testing
+
+```bash
+npm test    # Node.js native test runner
 ```
-
-## Implementation
-
-### Commands
-
-- `coach` — Check a prompt for English errors and provide corrections
-
-### Agents
-
-- `coach-engine` — Core correction logic, processes prompts and identifies error patterns
-
-### Scoring
-
-Success metrics:
-- **Accuracy**: Corrections are valid and don't change meaning (target: 99%+)
-- **Coverage**: All detectable errors are caught (target: 95%+)
-- **False positives**: Never flag correct text as wrong (target: <1%)
-
-## Development Strategy
-
-1. Start with command-line interface for testing
-2. Build correction agent with comprehensive error patterns
-3. Integrate with Claude Code's command system
-4. Gather feedback from non-native English speaking users
-5. Iterate on accuracy and coverage
-
-## Testing
-
-Tested with 1,263+ test cases covering:
-- Common spelling mistakes
-- Grammar and tense errors
-- Punctuation issues
-- Word choice and phrasing problems
-- Edge cases with code and technical terms

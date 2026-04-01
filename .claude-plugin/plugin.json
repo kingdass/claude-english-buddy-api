@@ -1,41 +1,8 @@
 {
   "name": "english-coach",
-  "version": "0.1.0",
-  "description": "English language coaching for non-native speakers using AI coding tools. Corrects spelling, grammar, punctuation, and word choice while preserving technical intent.",
+  "version": "0.2.0",
+  "description": "English language coach for non-native speakers — auto-corrects prompts, translates non-English, refines with :: prefix, tracks improvement over time",
   "author": {
     "name": "xiaolai"
-  },
-  "license": "MIT",
-  "keywords": [
-    "english",
-    "language",
-    "coaching",
-    "grammar",
-    "writing",
-    "non-native",
-    "correction"
-  ],
-  "category": "developer-tools",
-  "commands": [
-    {
-      "name": "check",
-      "description": "Check a prompt for English errors"
-    },
-    {
-      "name": "analyze",
-      "description": "Get detailed analysis of English errors"
-    }
-  ],
-  "agents": [
-    {
-      "name": "coach-engine",
-      "description": "Core English language correction engine"
-    }
-  ],
-  "skills": [
-    {
-      "name": "error-analyzer",
-      "description": "Analyze error patterns and provide feedback"
-    }
-  ]
+  }
 }

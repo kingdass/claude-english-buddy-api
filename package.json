@@ -1,0 +1,14 @@
+{
+  "name": "english-coach",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "English language coach for non-native speakers using Claude Code — auto-correct, translate, refine, and track improvement over time",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  }
+}
