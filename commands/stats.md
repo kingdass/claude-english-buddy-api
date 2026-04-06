@@ -1,4 +1,5 @@
 ---
+name: stats
 description: "Long-term correction trends — error rate over time, most common mistakes, improvement trajectory"
 argument-hint: "[--days N]"
 ---
