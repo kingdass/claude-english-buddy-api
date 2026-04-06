@@ -1,4 +1,5 @@
 ---
+name: today
 description: "Today's language report — corrections made, recurring mistakes, lessons, and improvement trend"
 ---
 

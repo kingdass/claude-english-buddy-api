@@ -1,4 +1,5 @@
 ---
+name: config
 description: "Configure claude-english-buddy — set language, strictness, toggle auto-correction"
 argument-hint: "[--show | --set key=value]"
 ---

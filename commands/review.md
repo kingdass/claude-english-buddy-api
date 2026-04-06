@@ -1,4 +1,5 @@
 ---
+name: review
 description: "Deep English review of any text — commit messages, PR descriptions, docs, emails"
 argument-hint: "<text or file path>"
 ---
