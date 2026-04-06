@@ -1,4 +1,5 @@
 ---
+name: writing-reviewer
 description: |
   Deep English text reviewer — thorough analysis of grammar, clarity, tone, and structure for non-native speakers.
   <example>
