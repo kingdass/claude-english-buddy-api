@@ -13,8 +13,8 @@
         "source": "github",
         "repo": "xiaolai/claude-english-buddy-for-claude"
       },
-      "description": "English language coach for non-native speakers — auto-corrects prompts, translates non-English, refines with :: prefix, tracks improvement over time",
-      "version": "0.2.2",
+      "description": "English language coach for non-native speakers \u2014 auto-corrects prompts, translates non-English, refines with :: prefix, tracks improvement over time",
+      "version": "0.2.3",
       "author": {
         "name": "xiaolai"
       },
