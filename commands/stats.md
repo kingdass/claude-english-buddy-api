@@ -2,6 +2,7 @@
 name: stats
 description: "Long-term correction trends — error rate over time, most common mistakes, improvement trajectory"
 argument-hint: "[--days N]"
+allowed-tools: Bash, Glob, Read
 ---
 
 ## User Input
@@ -57,6 +58,11 @@ If the script fails, read JSONL files directly via Glob + Read and compute stats
 
 ## Analysis
 
-{Analyze the trend — improving, flat, or regressing?}
-{Identify the top 3 mistake categories and suggest focus areas.}
+{Trend verdict, using weekly error rates in order (oldest → newest):
+- **Improving** if weekly error rate decreased by >5 percentage points for 2+ consecutive weeks.
+- **Regressing** if weekly error rate increased by >5 percentage points for 2+ consecutive weeks.
+- **Flat** otherwise.
+State the verdict in one sentence with the delta, e.g. "Improving — error rate down 8% over 3 weeks."}
+
+{Focus areas: group the full pattern list by category (spelling, grammar, punctuation, word-choice, article, preposition). Report the top 3 categories by total occurrence count. For each of those 3, list the single highest-count pattern and the category's share of total corrections as a percentage.}
 ```

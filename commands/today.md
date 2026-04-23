@@ -1,6 +1,7 @@
 ---
 name: today
 description: "Today's language report — corrections made, recurring mistakes, lessons, and improvement trend"
+allowed-tools: Bash, Glob, Read
 ---
 
 ## Workflow
@@ -62,7 +63,7 @@ If the script fails (module not found, node error, etc.), read the JSONL files d
 
 ## Lessons of the Day
 
-{Pick the top 2-3 most interesting/educational corrections from today. For each:}
+{Pick 2-3 corrections using this ranking, in order: (1) highest pattern frequency today (count desc); tie-break by (2) pattern also appears in 2+ prior sessions (broad applicability); tie-break by (3) category priority: grammar > article > preposition > word-choice > punctuation > spelling. For each:}
 
 1. **{pattern name}** — {explanation of the rule}
    Wrong: "{original}"

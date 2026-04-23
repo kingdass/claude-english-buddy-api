@@ -3,6 +3,8 @@
   "hooks": {
     "UserPromptSubmit": [
       {
+        "matcher": "*",
+        "description": "Intentionally global — the hook script itself filters out slash commands, short prompts, and code patterns before doing any work.",
         "hooks": [
           {
             "type": "command",

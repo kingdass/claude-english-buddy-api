@@ -2,6 +2,7 @@
 name: review
 description: "Deep English review of any text — commit messages, PR descriptions, docs, emails"
 argument-hint: "<text or file path>"
+allowed-tools: Bash, Read, AskUserQuestion
 ---
 
 ## User Input
@@ -28,7 +29,12 @@ Analyze the text for:
 
 1. **Grammar & Mechanics** — spelling, punctuation, tense, agreement, articles
 2. **Clarity** — awkward phrasing, ambiguous sentences, wordiness
-3. **Tone** — appropriate for the context (commit message vs docs vs email)
+3. **Tone** — apply the per-context rubric:
+   - **Commit message**: imperative mood ("Fix parser crash"), subject ≤72 chars, no trailing period, no articles at the start.
+   - **PR description**: present tense, full sentences, clear Summary / Changes / Test plan sections.
+   - **Documentation**: full sentences, second-person ("you") or imperative, no contractions, terminology consistent across sections.
+   - **Email**: greeting line, body in full sentences, sign-off/close; match formality to recipient (first name vs. "Dear …").
+   - **Inline comment / code doc**: one-line summary in imperative or present tense, ≤100 chars per line.
 4. **Structure** — logical flow, paragraph breaks, transitions
 5. **Technical accuracy** — correct use of technical terms
 
