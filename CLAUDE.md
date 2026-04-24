@@ -2,6 +2,11 @@
 
 English language coach for non-native speakers using Claude Code. Auto-corrects prompts via UserPromptSubmit hook, tracks corrections, generates daily reports.
 
+## Prerequisites
+
+- Node.js >= 18
+- Run `npm install` after cloning the plugin to install dependencies before running tests or hooks.
+
 ## Project structure
 
 ```
@@ -11,12 +16,30 @@ commands/
   mistakes.md           /mistakes — all-time recurring errors
   config.md             /config — configure settings
   review.md             /review — deep text review
+  preview.md            /preview — dry-run correction preview
+  drill.md              /drill — spot-quiz on top recurring mistakes
+  shared/
+    config-loader.md    Shared partial — resolve merged config
+    jsonl-parser.md     Shared partial — read JSONL history
+    format-report.md    Shared partial — report output conventions
 agents/
-  writing-reviewer.md   Deep English text reviewer (sonnet, green)
+  writing-reviewer.md   Deep English text reviewer — orchestrator
+  grammar-checker.md    Grammar and mechanics subagent
+  tone-calibrator.md    Tone and register subagent
+  clarity-enhancer.md   Clarity and phrasing subagent
 skills/
   claude-english-buddy/
-    writing-guide/
-      SKILL.md          English patterns for developers
+    writing-guide/              SKILL.md — meta-router to focused skills
+    grammar-fundamentals/       Grammar rules reference
+    punctuation-rules/          Punctuation rules reference
+    tone-calibration/           Tone and register guidance
+    technical-writing/          Conventions for dev-facing prose
+    common-non-native-mistakes/ Common L2-English error patterns
+.claude/
+  rules/
+    01-voice-preservation.md    Preserve author voice during corrections
+    02-minimal-invasiveness.md  Only change text tied to an identified error
+    03-no-over-polishing.md     Cap lessons per review; no cosmetic rewrites
 hooks/
   hooks.json            UserPromptSubmit + SessionEnd hooks
 scripts/

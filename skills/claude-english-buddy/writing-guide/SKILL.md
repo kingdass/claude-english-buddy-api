@@ -1,80 +1,57 @@
 ---
 name: writing-guide
-description: "English writing patterns for developers — common mistakes by non-native speakers, technical writing conventions, and self-correction strategies. Use when reviewing or coaching English text."
-version: 0.1.0
+description: "Meta-skill that routes to the five focused writing skills in this plugin. Loads nothing substantive on its own — read this to decide which of grammar-fundamentals, punctuation-rules, tone-calibration, technical-writing, or common-non-native-mistakes to consult."
+version: 0.2.0
 ---
 
-# English for Developers — Quick Reference
+# Writing Guide (Meta-Skill)
 
-## Most Common Mistakes by Non-Native Speakers
+This skill used to contain all English writing patterns in a single file. It has been split into five focused skills. This file is now a router: read it to pick the right sibling skill for the task at hand.
 
-### Articles (a / the / zero article)
+If you loaded `writing-guide` directly, you almost always want one of the five skills below instead. Load the specific one(s) your task needs — or load all five for a deep review.
 
-| Wrong | Right | Rule |
-|-------|-------|------|
-| "Fix bug in authentication" | "Fix **the** bug in authentication" | Specific bug = use "the" |
-| "Create a new the file" | "Create a new file" | Already have "a" = drop "the" |
-| "I use the React" | "I use React" | Framework/tool names = no article |
+## Routing Table
 
-### Its vs It's
+| Trigger | Load this skill |
+|---------|-----------------|
+| Article (a/an/the) question, agreement, tense, preposition, comparative/superlative, countable-vs-mass noun | **grammar-fundamentals** |
+| Comma, semicolon, colon, hyphen/en-dash/em-dash, apostrophe, quotation mark | **punctuation-rules** |
+| "Does this fit a commit message / PR description / API doc / email / chat?" | **tone-calibration** |
+| API reference wording, README shape, error-message phrasing, active vs passive in docs, terminology consistency | **technical-writing** |
+| "I think this is a typical L2 pattern" — recurring non-native slips (article misuse, 'I am agree', preposition transfer, false cognates, word-order inversion) | **common-non-native-mistakes** |
 
-| Form | Meaning | Example |
-|------|---------|---------|
-| it's | it is / it has | "It's broken" = "It is broken" |
-| its | possessive (belonging to it) | "The module and its tests" |
+## When to Load Multiple
 
-### Subject-Verb Agreement
+| Task | Combination |
+|------|-------------|
+| Full deep review of any text | all five |
+| Commit-message polish | tone-calibration + grammar-fundamentals + common-non-native-mistakes |
+| README audit | technical-writing + grammar-fundamentals + punctuation-rules |
+| Quick grammar check on a sentence | grammar-fundamentals + common-non-native-mistakes |
+| Punctuation-only pass (e.g. pre-publication polish) | punctuation-rules |
 
-| Wrong | Right | Rule |
-|-------|-------|------|
-| "There is many issues" | "There **are** many issues" | Plural subject = plural verb |
-| "The data show" | "The data **shows**" | "Data" is usually singular in tech |
-| "None of the tests pass" | "None of the tests **passes**" | "None" = singular (formal) |
+## Skill Fingerprints
 
-### Who vs That vs Which
+### grammar-fundamentals
 
-| Use | For | Example |
-|-----|-----|---------|
-| who | People | "The developer **who** wrote this" |
-| that | Things (restrictive) | "The function **that** handles auth" |
-| which | Things (non-restrictive) | "The module, **which** was added last week, has a bug" |
+Covers: articles (a/an/the), subject-verb agreement, its vs it's, who/that/which, prepositions, tense consistency, countable vs mass nouns, comparatives/superlatives.
 
-### Prepositions
+### punctuation-rules
 
-| Wrong | Right |
-|-------|-------|
-| "depend of" | "depend **on**" |
-| "consist in" | "consist **of**" |
-| "different of" | "different **from**" |
-| "search a solution" | "search **for** a solution" |
+Covers: serial (Oxford) comma, comma joining independent clauses, introductory comma, comma splice, semicolons, colons, hyphens vs en-dashes vs em-dashes, apostrophes (possession, contractions, plurals), quotation marks (US punctuation placement), periods in lists and headings.
 
-## Technical Writing Patterns
+### tone-calibration
 
-### Imperative Voice for Instructions
+Covers: imperative voice for instructions, concise phrasing (wordy → concise), per-context rubrics (commit message, PR description, code comments, API documentation, email, inline chat), tone calibration checklist.
 
-| Weak | Strong |
-|------|--------|
-| "You should run the tests" | "Run the tests" |
-| "It would be good to add logging" | "Add logging" |
-| "We need to refactor this" | "Refactor this" |
+### technical-writing
 
-### Concise Phrasing
+Covers: active vs passive voice, API documentation five-part structure, README section order, error-message wording, terminology consistency, headings, lists, tables, cross-references, concise phrasing applied to docs.
 
-| Wordy | Concise |
-|-------|---------|
-| "In order to" | "To" |
-| "Due to the fact that" | "Because" |
-| "At this point in time" | "Now" |
-| "In the event that" | "If" |
-| "Has the ability to" | "Can" |
-| "Is going to" | "Will" |
+### common-non-native-mistakes
 
-### Commit Message Patterns
+Covers: article slips, preposition confusion, 'I am agree' copula stacking, subject-verb agreement, its/it's, tense mismatch, double comparatives, plural/uncountable confusion, word-order inversion, false cognates, commit-message-specific slips.
 
-| Bad | Good |
-|-----|------|
-| "Fixed bug" | "Fix null pointer in session handler" |
-| "Updated code" | "Refactor auth module to use token-based validation" |
-| "Changes" | "Add rate limiting to API endpoints" |
+## Scope
 
-Rule: imperative mood, present tense, specific. "Fix X" not "Fixed X" or "Fixes X".
+This meta-skill contains no grammar, punctuation, tone, documentation, or L2-pattern rules on its own. Every rule lives in one of the five sibling skills. If you are tempted to add content here, add it to the matching sibling skill instead.

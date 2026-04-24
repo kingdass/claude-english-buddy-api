@@ -1,6 +1,18 @@
 ---
 name: today
-description: "Today's language report — corrections made, recurring mistakes, lessons, and improvement trend"
+description: |
+  Today's language report — corrections made, recurring mistakes, lessons, and improvement trend.
+  <example>
+  Context: User wants a quick summary of the corrections made during today's session.
+  user: "/claude-english-buddy:today"
+  assistant: "Loading today's correction history and comparing against yesterday and the 7-day average."
+  </example>
+  <example>
+  Context: User wants to widen the window beyond just today.
+  user: "/claude-english-buddy:today --days 3"
+  assistant: "Generating a report covering the last 3 days of prompts, corrections, and recurring patterns."
+  </example>
+argument-hint: "[--days N]"
 allowed-tools: Bash, Glob, Read
 ---
 

@@ -1,6 +1,17 @@
 ---
 name: stats
-description: "Long-term correction trends — error rate over time, most common mistakes, improvement trajectory"
+description: |
+  Long-term correction trends — error rate over time, most common mistakes, improvement trajectory.
+  <example>
+  Context: User wants the default 30-day view of their language stats.
+  user: "/claude-english-buddy:stats"
+  assistant: "Computing the last 30 days of prompts, corrections, weekly trend, and top recurring mistakes."
+  </example>
+  <example>
+  Context: User wants a tighter 7-day window to see recent progress.
+  user: "/claude-english-buddy:stats --days 7"
+  assistant: "Generating a 7-day stats report with weekly trend and top patterns."
+  </example>
 argument-hint: "[--days N]"
 allowed-tools: Bash, Glob, Read
 ---

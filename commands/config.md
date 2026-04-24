@@ -1,6 +1,17 @@
 ---
 name: config
-description: "Configure claude-english-buddy — set language, strictness, toggle auto-correction"
+description: |
+  Configure claude-english-buddy — set language, strictness, toggle auto-correction.
+  <example>
+  Context: User wants to inspect the currently active merged configuration.
+  user: "/claude-english-buddy:config --show"
+  assistant: "Reading project and plugin-data config files and displaying the merged active settings with their source."
+  </example>
+  <example>
+  Context: User wants to raise the strictness level for their next session.
+  user: "/claude-english-buddy:config --set strictness=strict"
+  assistant: "Updating .claude-english-buddy.json with strictness=strict and showing the updated merged config."
+  </example>
 argument-hint: "[--show | --set key=value]"
 allowed-tools: Bash, Read
 ---

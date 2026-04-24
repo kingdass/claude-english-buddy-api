@@ -1,6 +1,17 @@
 ---
 name: mistakes
-description: "Your top recurring English mistakes — all-time patterns that need attention"
+description: |
+  Your top recurring English mistakes — all-time patterns that need attention.
+  <example>
+  Context: User wants the default top-20 all-time recurring mistakes.
+  user: "/claude-english-buddy:mistakes"
+  assistant: "Loading all-time correction history and ranking your top 20 recurring patterns by frequency."
+  </example>
+  <example>
+  Context: User wants only the top 5 patterns to focus on.
+  user: "/claude-english-buddy:mistakes --top 5"
+  assistant: "Showing your top 5 recurring mistakes grouped by category with focus areas."
+  </example>
 argument-hint: "[--top N]"
 allowed-tools: Bash, Glob, Read
 ---
