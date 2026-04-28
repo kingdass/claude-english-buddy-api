@@ -14,12 +14,12 @@
         "repo": "xiaolai/claude-english-buddy-for-claude"
       },
       "description": "English language coach for non-native speakers \u2014 auto-corrects prompts, translates non-English, refines with :: prefix, tracks improvement over time",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "author": {
         "name": "xiaolai"
       },
       "repository": "https://github.com/xiaolai/claude-english-buddy-for-claude",
-      "license": "MIT",
+      "license": "ISC",
       "keywords": [
         "english",
         "language",

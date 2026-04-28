@@ -176,4 +176,4 @@ npm test    # 22 tests covering detection, state, and stats
 
 ## License
 
-MIT
+ISC
