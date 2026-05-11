@@ -1,5 +1,7 @@
 # claude-english-buddy
 
+[![Validated by NLPM](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/xiaolai/claude-english-buddy-for-claude/main/nlpm-badge.json)](https://github.com/xiaolai/claude-english-buddy-for-claude/blob/main/nlpm-badge.json)
+
 English language coach for non-native speakers who use Claude Code daily.
 
 ## The Problem
