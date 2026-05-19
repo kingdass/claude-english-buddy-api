@@ -3,6 +3,7 @@
 
 import process from "node:process";
 import { readToday } from "./lib/state.mjs";
+import { parseAnnotations } from "./lib/annotations.mjs";
 
 function main() {
   const records = readToday();
@@ -25,22 +26,28 @@ function main() {
 
   process.stderr.write(parts.join(", ") + "\n");
 
-  // Find recurring mistakes in this session
+  // Find recurring mistakes in this session — bucket by case-insensitive
+  // (original, corrected) pair so "Its" and "its" count together.
   const fixes = {};
   for (const r of corrections) {
-    if (!r.annotations) continue;
-    const items = r.annotations.replace(/^\(/, "").replace(/\)$/, "").split(";").map((s) => s.trim()).filter(Boolean);
-    for (const item of items) {
-      fixes[item] = (fixes[item] || 0) + 1;
+    for (const fix of parseAnnotations(r.annotations)) {
+      const key = `${fix.original.toLowerCase()}|${fix.corrected.toLowerCase()}`;
+      const entry = fixes[key] || { label: `${fix.original} → ${fix.corrected}`, count: 0 };
+      entry.count += 1;
+      fixes[key] = entry;
     }
   }
 
-  const recurring = Object.entries(fixes)
-    .filter(([, count]) => count >= 2)
-    .sort(([, a], [, b]) => b - a);
+  const recurring = Object.values(fixes)
+    .filter((entry) => entry.count >= 2)
+    .sort((a, b) => b.count - a.count);
 
   if (recurring.length > 0) {
-    process.stderr.write("Recurring this session: " + recurring.map(([fix, n]) => `${fix} (${n}x)`).join(", ") + "\n");
+    process.stderr.write(
+      "Recurring this session: " +
+        recurring.map((entry) => `${entry.label} (${entry.count}x)`).join(", ") +
+        "\n",
+    );
   }
 }
 

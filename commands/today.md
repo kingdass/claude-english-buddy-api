@@ -63,15 +63,16 @@ If the script fails (module not found, node error, etc.), read the JSONL files d
 
 ## Today's Corrections
 
-| # | You Wrote | Corrected | Pattern |
-|---|-----------|-----------|---------|
-{for each record in today.records: | N | original | corrected | annotations |}
+| # | You Wrote | Corrected | Fixes |
+|---|-----------|-----------|-------|
+{for each record in today.records: | N | original | corrected | fixes |}
+{where `fixes` is the record's annotations joined into one cell — if annotations is multi-line `wrong → right (category)`, replace newlines with `<br>` so the table renders; if it is the legacy `(a>b; c>d)` form, render it verbatim}
 
 ## Recurring Patterns
 
 | Pattern | Count Today | Status |
 |---------|:-----------:|--------|
-{for each pattern with count > 1: | original > corrected | count | comment |}
+{for each pattern with count > 1: | `original → corrected` | count | comment |}
 
 ## Lessons of the Day
 

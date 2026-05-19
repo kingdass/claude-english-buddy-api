@@ -70,7 +70,7 @@ For each of the N rounds (default 3):
 ```markdown
 # Drill Round {1 of N} — Category: {category}
 
-Your recurring pattern: **{original > corrected}** (seen {count} times)
+Your recurring pattern: **{original → corrected}** (seen {count} times)
 
 ## The Sentence
 

@@ -10,6 +10,11 @@ import process from "node:process";
 
 import { detectMode } from "./lib/detect.mjs";
 import { logCorrection, logClean, resolveConfig } from "./lib/state.mjs";
+import {
+  parseAnnotations,
+  formatAnnotationsForStorage,
+  formatAnnotationsForDisplay,
+} from "./lib/annotations.mjs";
 
 function readStdin() {
   return JSON.parse(fs.readFileSync(0, "utf8").trim() || "{}");
@@ -171,17 +176,31 @@ function callHaikuBedrock(systemPrompt, userText) {
 
 const SYSTEM_CORRECT = `You are an English language coach for a non-native speaker who uses AI coding tools daily.
 The user's prompt will be processed by an AI assistant that understands them regardless of errors. Your job is to help the USER improve by showing corrections.
+
 Rules:
 - Fix spelling, grammar, punctuation, and word choice errors
 - Improve awkward phrasing to sound natural
 - Keep technical terms, code references, and tool names unchanged
 - Preserve the user's intent and structure exactly
 - Do NOT restructure or expand the prompt — only correct errors
+- Never emit a correction whose before and after sides are identical after trimming — only flag real changes
+- Show the smallest token that actually changed, not the whole surrounding phrase (e.g. "html → HTML", not "rather than single html → rather than a single HTML file")
+- Surface at most 3 corrections per prompt; pick the ones most worth learning from
+
 Output format (strict):
-- If the prompt has errors, output EXACTLY two lines:
-  Line 1: The corrected prompt
-  Line 2: A parenthetical listing each fix as original>corrected, separated by semicolons
-- If the prompt has NO errors, output EXACTLY: CLEAN`;
+- If the prompt has NO errors, output EXACTLY: CLEAN
+- If the prompt has errors, output the corrected prompt on the first line, then a blank line, then ONE correction per line in the format:
+    {wrong} → {right} ({short category})
+  where {short category} is one or two words such as: missing article, acronym capitalization, verb tense, word choice, spelling, apostrophe, preposition, punctuation, capitalization, agreement.
+  Do not add bullet markers; do not wrap in parentheses; do not repeat the corrected sentence.
+
+Example input: "i seen the file but its missing comma"
+Example output:
+I saw the file, but it's missing a comma.
+
+i → I (capitalization)
+seen → saw (verb tense)
+its → it's (apostrophe)`;
 
 const SYSTEM_TRANSLATE = `You are a translator for a developer who uses AI coding tools.
 Rules:
@@ -287,15 +306,30 @@ function main() {
     return;
   }
 
-  const lines = result.split("\n").filter(Boolean);
-  const corrected = lines[0] || result;
-  const annotations = lines[1] || "";
+  const rawLines = result.split("\n");
+  const corrected = (rawLines[0] || result).trim();
+  const annotationBlock = rawLines.slice(1).join("\n").trim();
+
+  // Parse Haiku's output through the shared parser so we get defensive
+  // no-op suppression and tolerate format drift (stray bullets, missing
+  // categories, accidental legacy `>` syntax).
+  const parsed = parseAnnotations(annotationBlock);
+  const annotations = formatAnnotationsForStorage(parsed);
+
+  // If the model emitted zero real corrections (everything was a no-op),
+  // treat the prompt as clean rather than logging a misleading entry.
+  if (parsed.length === 0) {
+    logClean();
+    if (summaryCtx) emit({ additionalContext: summaryCtx });
+    return;
+  }
 
   logCorrection({ mode: "correct", original: detection.text, corrected, annotations });
 
   let ctx = `Corrected prompt: ${corrected}`;
   if (summaryCtx) ctx += " " + summaryCtx;
-  const msg = annotations ? `${corrected}\n${annotations}` : corrected;
+  const display = formatAnnotationsForDisplay(parsed);
+  const msg = display ? `${corrected}\n${display}` : corrected;
   emit({ additionalContext: ctx, systemMessage: msg });
 }
 

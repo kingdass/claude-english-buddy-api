@@ -27,7 +27,7 @@ Every record has these fields (some nullable):
 | `mode` | `"correct"` / `"translate"` / `"refine"` / `"clean"` | Which hook branch fired |
 | `original` | string or null | User's raw input (null for `clean`) |
 | `corrected` | string or null | What the hook produced (null for `clean`) |
-| `annotations` | string or null | Parenthetical diff string, e.g. `(its got>it has; modul>module)` |
+| `annotations` | string or null | Diff string. Current format: one fix per line, `wrong → right (category)`, e.g. `its → it's (apostrophe)\nmodul → module (spelling)`. Legacy format still present in older files: `(its got>it has; modul>module)` |
 | `pattern` | string or null | Dominant pattern label (optional) |
 | `session` | string or null | `CLAUDE_SESSION_ID` when the hook ran |
 
@@ -62,17 +62,31 @@ When the library import fails (missing node_modules, wrong path), commands MUST 
 
 ### Extracting Corrections
 
-Within the parsed records, corrections are every record where `mode !== "clean"`. The `annotations` field, when present, contains the diff pairs joined by `; ` inside parentheses — e.g. `(autentication>authentication; modul>module)`. Split on `; ` to get individual diff pairs; split each pair on `>` to get `[original, corrected]`.
+Within the parsed records, corrections are every record where `mode !== "clean"`. The `annotations` field, when present, holds diff pairs.
+
+Prefer the shared parser:
+
+```js
+const { parseAnnotations } = await import(`${process.env.CLAUDE_PLUGIN_ROOT}/scripts/lib/annotations.mjs`);
+const fixes = parseAnnotations(record.annotations); // [{ original, corrected, category }, ...]
+```
+
+The parser handles both the current `wrong → right (category)` multi-line format and the legacy `(a>b; c>d)` parenthetical format, suppresses no-op entries where `original === corrected`, and returns `[]` for translation records (whose annotation is a language tag, not a diff).
+
+If the parser import fails, raw fallback rules:
+
+- If the string contains ` → `, split on newlines, then match each line against `^(.+?) → (.+?)(?:\s*\((.+)\))?$`.
+- Otherwise, if it starts with `(`, strip the surrounding parens, split on `;`, then split each pair on the FIRST `>`.
 
 ### Pattern Extraction for Reports
 
 For stats and mistakes reports, aggregate by the `(original, corrected)` pair across records:
 
 1. Iterate records.
-2. Parse the `annotations` diff pairs.
-3. Count occurrences of each `original>corrected` pair.
+2. Call `parseAnnotations(record.annotations)` to get fix objects.
+3. Count occurrences of each case-insensitive `original → corrected` pair.
 4. Sort by count descending.
-5. Classify each pair into a category (spelling, grammar, punctuation, word-choice, article, preposition) using heuristics.
+5. Use the embedded `category` when present; otherwise classify with heuristics (spelling, grammar, punctuation, word-choice, article, preposition).
 
 ### Extracting User Prompts
 
