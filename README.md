@@ -59,12 +59,23 @@ Four modes, one hook, zero friction:
 
 ## Install
 
+Two install paths — both reach the same code. Pick one:
+
+**Via Anthropic's official community marketplace** (curated; updates lag the maintainer's marketplace by up to ~24h):
+
+```bash
+/plugin marketplace add anthropics/claude-plugins-community
+/plugin install claude-english-buddy@claude-community
+```
+
+**Via the xiaolai marketplace** (latest version lands here first):
+
 ```bash
 /plugin marketplace add xiaolai/claude-plugin-marketplace
 /plugin install claude-english-buddy@xiaolai
 ```
 
-> **Install fails with "Plugin not found in marketplace 'xiaolai'"?** Your local marketplace clone is stale. Run `claude plugin marketplace update xiaolai` and retry — `plugin install` does not auto-refresh.
+> **Install fails with "Plugin not found in marketplace 'xiaolai'"?** Your local marketplace clone is stale. Run `claude plugin marketplace update xiaolai` and retry — `plugin install` does not auto-refresh. (The community marketplace doesn't have this caveat — Anthropic's CI keeps it current.)
 
 ## Commands
 
