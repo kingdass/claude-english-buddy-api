@@ -329,7 +329,14 @@ function main() {
   let ctx = `Corrected prompt: ${corrected}`;
   if (summaryCtx) ctx += " " + summaryCtx;
   const display = formatAnnotationsForDisplay(parsed);
-  const msg = display ? `${corrected}\n${display}` : corrected;
+  // Prefix the systemMessage so it reads naturally after Claude Code's
+  // "UserPromptSubmit says:" wrapper. Without the label the reader can't
+  // tell that the text below is the *interpreted* version of what they
+  // typed — it looks like a raw echo. "User intends to say:" mirrors the
+  // attribution-friendly framing the plugin uses elsewhere.
+  const msg = display
+    ? `User intends to say: ${corrected}\n${display}`
+    : `User intends to say: ${corrected}`;
   emit({ additionalContext: ctx, systemMessage: msg });
 }
 
