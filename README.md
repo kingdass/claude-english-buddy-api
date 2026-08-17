@@ -59,23 +59,32 @@ Four modes, one hook, zero friction:
 
 ## Install
 
-Two install paths — both reach the same code. Pick one:
-
-**Via Anthropic's official community marketplace** (curated; updates lag the maintainer's marketplace by up to ~24h):
+Install directly from this fork:
 
 ```bash
-/plugin marketplace add anthropics/claude-plugins-community
-/plugin install claude-english-buddy@claude-community
+claude plugin install kingdass/claude-english-buddy-api
 ```
 
-**Via the xiaolai marketplace** (latest version lands here first):
+Or via this repo as a marketplace:
 
 ```bash
-/plugin marketplace add xiaolai/claude-plugin-marketplace
-/plugin install claude-english-buddy@xiaolai
+claude plugin marketplace add kingdass/claude-english-buddy-api
+claude plugin install claude-english-buddy@kingdass
 ```
 
-> **Install fails with "Plugin not found in marketplace 'xiaolai'"?** Your local marketplace clone is stale. Run `claude plugin marketplace update xiaolai` and retry — `plugin install` does not auto-refresh. (The community marketplace doesn't have this caveat — Anthropic's CI keeps it current.)
+Then configure your external LLM key so the hook can correct/translate
+without a Claude subscription (see [External LLM](#external-llm-no-claude-subscription-required)):
+
+```bash
+export OPENAI_API_KEY=sk-xxxxxxxx
+export OPENAI_BASE_URL=https://api.deepseek.com/v1
+export ENGLISH_BUDDY_MODEL=deepseek-chat
+```
+
+> This is a fork of [xiaolai/claude-english-buddy-for-claude](https://github.com/xiaolai/claude-english-buddy-for-claude),
+> modified to support external LLM API keys (DeepSeek / OpenAI / Kimi / …)
+> instead of requiring a Claude subscription. The original upstream is at
+> [xiaolai/claude-english-buddy-for-claude](https://github.com/xiaolai/claude-english-buddy-for-claude).
 
 ## Commands
 
