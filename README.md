@@ -162,6 +162,13 @@ environment variables:
 | `OPENAI_BASE_URL` | Base URL of the compatible endpoint | `https://api.deepseek.com/v1` |
 | `ENGLISH_BUDDY_MODEL` | Model name | `deepseek-chat` |
 
+> **No separate key needed.** The plugin never generates its own API key —
+> it reuses whatever key you already have for that provider. Point
+> `OPENAI_API_KEY` at the same key you already use; for DeepSeek the base URL
+> and model default for you, so setting just `OPENAI_API_KEY` is enough. Put
+> these in `~/.claude/settings.json` `env` (or your shell profile) on each
+> machine — same key, same three lines, no new credentials.
+
 Examples:
 
 ```bash
