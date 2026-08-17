@@ -1,7 +1,7 @@
 {
-  "name": "xiaolai",
+  "name": "kingdass",
   "owner": {
-    "name": "xiaolai"
+    "name": "kingdass"
   },
   "metadata": {
     "description": "English language coach for non-native speakers"
@@ -11,14 +11,14 @@
       "name": "claude-english-buddy",
       "source": {
         "source": "github",
-        "repo": "xiaolai/claude-english-buddy-for-claude"
+        "repo": "kingdass/claude-english-buddy-api"
       },
       "description": "English language coach for non-native speakers \u2014 auto-corrects prompts, translates non-English, refines with :: prefix, tracks improvement over time",
       "version": "0.5.0",
       "author": {
         "name": "xiaolai"
       },
-      "repository": "https://github.com/xiaolai/claude-english-buddy-for-claude",
+      "repository": "https://github.com/kingdass/claude-english-buddy-api",
       "license": "ISC",
       "keywords": [
         "english",
