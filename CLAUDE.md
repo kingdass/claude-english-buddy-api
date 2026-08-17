@@ -49,7 +49,7 @@ scripts/
     detect.mjs          Language detection (ASCII ratio heuristic)
     state.mjs           Correction history (JSONL per day)
     stats.mjs           Trend analysis and pattern extraction
-    provider.mjs        External LLM (OpenAI-compatible) provider resolution
+    provider.mjs        External LLM provider resolution (chat-completions)
 tests/
   detect.test.mjs       Language detection tests
   state.test.mjs        State persistence tests
@@ -75,7 +75,7 @@ All modes inject corrected/translated text into `additionalContext` so Claude ac
 The hook's LLM call (`callLLM` in `scripts/prompt-coach-hook.mjs`) routes by
 priority:
 
-1. **External OpenAI-compatible API** — when `OPENAI_API_KEY` / `DEEPSEEK_API_KEY` is set. Base URL and model come from `OPENAI_BASE_URL` / `ENGLISH_BUDDY_MODEL` (DeepSeek defaults). See `scripts/lib/provider.mjs`.
+1. **External chat-completions API** — when `ENGLISH_BUDDY_API_KEY` is set. Base URL and model come from `ENGLISH_BUDDY_BASE_URL` / `ENGLISH_BUDDY_MODEL` (DeepSeek defaults). See `scripts/lib/provider.mjs`.
 2. **Bedrock** — when `CLAUDE_CODE_USE_BEDROCK=1`.
 3. **Anthropic** — OAuth / `ANTHROPIC_API_KEY` / macOS keychain (original default).
 

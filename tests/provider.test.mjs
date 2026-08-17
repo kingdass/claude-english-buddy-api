@@ -5,7 +5,7 @@ import {
   externalApiKey,
   externalBaseUrl,
   externalModel,
-  buildOpenAIBody,
+  buildChatBody,
 } from "../scripts/lib/provider.mjs";
 
 function withEnv(env, fn) {
@@ -25,33 +25,27 @@ function withEnv(env, fn) {
   }
 }
 
-test("externalApiKey prefers OPENAI_API_KEY over DEEPSEEK_API_KEY", () => {
-  withEnv({ OPENAI_API_KEY: "sk-openai", DEEPSEEK_API_KEY: "sk-deepseek" }, () => {
-    assert.equal(externalApiKey(), "sk-openai");
+test("externalApiKey reads ENGLISH_BUDDY_API_KEY", () => {
+  withEnv({ ENGLISH_BUDDY_API_KEY: "sk-test" }, () => {
+    assert.equal(externalApiKey(), "sk-test");
   });
 });
 
-test("externalApiKey falls back to DEEPSEEK_API_KEY", () => {
-  withEnv({ OPENAI_API_KEY: undefined, DEEPSEEK_API_KEY: "sk-deepseek" }, () => {
-    assert.equal(externalApiKey(), "sk-deepseek");
-  });
-});
-
-test("externalApiKey returns empty string when neither is set", () => {
-  withEnv({ OPENAI_API_KEY: undefined, DEEPSEEK_API_KEY: undefined }, () => {
+test("externalApiKey returns empty string when unset", () => {
+  withEnv({ ENGLISH_BUDDY_API_KEY: undefined }, () => {
     assert.equal(externalApiKey(), "");
   });
 });
 
 test("externalBaseUrl defaults to DeepSeek", () => {
-  withEnv({ OPENAI_BASE_URL: undefined }, () => {
+  withEnv({ ENGLISH_BUDDY_BASE_URL: undefined }, () => {
     assert.equal(externalBaseUrl(), "https://api.deepseek.com/v1");
   });
 });
 
 test("externalBaseUrl strips trailing slashes", () => {
-  withEnv({ OPENAI_BASE_URL: "https://api.openai.com/v1/" }, () => {
-    assert.equal(externalBaseUrl(), "https://api.openai.com/v1");
+  withEnv({ ENGLISH_BUDDY_BASE_URL: "https://api.moonshot.cn/v1/" }, () => {
+    assert.equal(externalBaseUrl(), "https://api.moonshot.cn/v1");
   });
 });
 
@@ -67,9 +61,9 @@ test("externalModel honors ENGLISH_BUDDY_MODEL", () => {
   });
 });
 
-test("buildOpenAIBody emits system + user messages and max_tokens", () => {
+test("buildChatBody emits system + user messages and max_tokens", () => {
   const body = JSON.parse(
-    buildOpenAIBody({ model: "deepseek-chat", systemPrompt: "SYS", userText: "hello" }),
+    buildChatBody({ model: "deepseek-chat", systemPrompt: "SYS", userText: "hello" }),
   );
   assert.equal(body.model, "deepseek-chat");
   assert.equal(body.max_tokens, 1024);

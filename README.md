@@ -76,13 +76,13 @@ Then configure your external LLM key so the hook can correct/translate
 without a Claude subscription (see [External LLM](#external-llm-no-claude-subscription-required)):
 
 ```bash
-export OPENAI_API_KEY=sk-xxxxxxxx
-export OPENAI_BASE_URL=https://api.deepseek.com/v1
+export ENGLISH_BUDDY_API_KEY=sk-xxxxxxxx
+export ENGLISH_BUDDY_BASE_URL=https://api.deepseek.com/v1
 export ENGLISH_BUDDY_MODEL=deepseek-chat
 ```
 
 > This is a fork of [xiaolai/claude-english-buddy-for-claude](https://github.com/xiaolai/claude-english-buddy-for-claude),
-> modified to support external LLM API keys (DeepSeek / OpenAI / Kimi / …)
+> modified to support external LLM API keys (DeepSeek / Kimi / Qwen / GLM / …)
 > instead of requiring a Claude subscription. The original upstream is at
 > [xiaolai/claude-english-buddy-for-claude](https://github.com/xiaolai/claude-english-buddy-for-claude).
 
@@ -150,47 +150,46 @@ Same format. Project config overrides global.
 
 ### External LLM (no Claude subscription required)
 
-The hook's correction/translation/refine calls can run on **any
-OpenAI-compatible API** — DeepSeek, OpenAI, Kimi/Moonshot, Qwen, GLM, etc. —
-so you don't need a Claude subscription or an Anthropic API key. Set these
-environment variables:
+The hook's correction/translation/refine calls can run on **any provider that
+exposes a `/chat/completions` endpoint** — DeepSeek, Kimi/Moonshot, Qwen, GLM,
+etc. — so you don't need a Claude subscription or an Anthropic API key. Set
+these environment variables:
 
 | Variable | Purpose | Default |
 |----------|---------|---------|
-| `OPENAI_API_KEY` | Your external LLM API key | — |
-| `DEEPSEEK_API_KEY` | Alias, used only if `OPENAI_API_KEY` is unset | — |
-| `OPENAI_BASE_URL` | Base URL of the compatible endpoint | `https://api.deepseek.com/v1` |
+| `ENGLISH_BUDDY_API_KEY` | Your provider's API key | — |
+| `ENGLISH_BUDDY_BASE_URL` | Base URL of the chat endpoint | `https://api.deepseek.com/v1` |
 | `ENGLISH_BUDDY_MODEL` | Model name | `deepseek-chat` |
 
 > **No separate key needed.** The plugin never generates its own API key —
 > it reuses whatever key you already have for that provider. Point
-> `OPENAI_API_KEY` at the same key you already use; for DeepSeek the base URL
-> and model default for you, so setting just `OPENAI_API_KEY` is enough. Put
-> these in `~/.claude/settings.json` `env` (or your shell profile) on each
-> machine — same key, same three lines, no new credentials.
+> `ENGLISH_BUDDY_API_KEY` at the same key you already use; for DeepSeek the
+> base URL and model default for you, so setting just `ENGLISH_BUDDY_API_KEY`
+> is enough. Put these in `~/.claude/settings.json` `env` (or your shell
+> profile) on each machine — same key, same three lines, no new credentials.
 
 Examples:
 
 ```bash
 # DeepSeek
-export OPENAI_API_KEY=sk-xxxxxxxx
-export OPENAI_BASE_URL=https://api.deepseek.com/v1
+export ENGLISH_BUDDY_API_KEY=sk-xxxxxxxx
+export ENGLISH_BUDDY_BASE_URL=https://api.deepseek.com/v1
 export ENGLISH_BUDDY_MODEL=deepseek-chat
 
-# OpenAI
-export OPENAI_API_KEY=sk-xxxxxxxx
-export OPENAI_BASE_URL=https://api.openai.com/v1
-export ENGLISH_BUDDY_MODEL=gpt-4o-mini
-
 # Kimi / Moonshot
-export OPENAI_API_KEY=sk-xxxxxxxx
-export OPENAI_BASE_URL=https://api.moonshot.cn/v1
+export ENGLISH_BUDDY_API_KEY=sk-xxxxxxxx
+export ENGLISH_BUDDY_BASE_URL=https://api.moonshot.cn/v1
 export ENGLISH_BUDDY_MODEL=kimi-latest
+
+# Qwen / 通义千问 (DashScope)
+export ENGLISH_BUDDY_API_KEY=sk-xxxxxxxx
+export ENGLISH_BUDDY_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+export ENGLISH_BUDDY_MODEL=qwen-plus
 ```
 
-Provider routing order: external key (`OPENAI_API_KEY` / `DEEPSEEK_API_KEY`)
-→ Bedrock → Anthropic / Claude Code OAuth. Setting an external key is all you
-need; existing Claude-membership users are unaffected.
+Provider routing order: external key (`ENGLISH_BUDDY_API_KEY`) → Bedrock →
+Anthropic / Claude Code OAuth. Setting an external key is all you need;
+existing Claude-membership users are unaffected.
 
 ### AWS Bedrock
 
@@ -246,7 +245,7 @@ The goal is not perfection. The goal is **visible progress** — seeing your err
 | `scripts/lib/state.mjs` | JSONL correction history per day |
 | `scripts/lib/detect.mjs` | Language detection (ASCII ratio) |
 | `scripts/lib/stats.mjs` | Trend analysis and pattern extraction |
-| `scripts/lib/provider.mjs` | External LLM (OpenAI-compatible) provider resolution |
+| `scripts/lib/provider.mjs` | External LLM provider resolution (chat-completions) |
 
 ## Tests
 

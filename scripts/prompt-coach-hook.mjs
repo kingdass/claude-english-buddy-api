@@ -14,7 +14,7 @@ import {
   externalApiKey,
   externalBaseUrl,
   externalModel,
-  buildOpenAIBody,
+  buildChatBody,
 } from "./lib/provider.mjs";
 import {
   parseAnnotations,
@@ -75,14 +75,14 @@ function getCredentials() {
 
 // Route the correction/translation/refine call to the right provider.
 // Priority:
-//   1. External OpenAI-compatible API (DeepSeek by default) — when
-//      OPENAI_API_KEY or DEEPSEEK_API_KEY is set. This lets the plugin run on
-//      any external LLM key instead of requiring a Claude subscription.
+//   1. External chat-completions API (DeepSeek by default) — when
+//      ENGLISH_BUDDY_API_KEY is set. This lets the plugin run on any external
+//      LLM key instead of requiring a Claude subscription.
 //   2. AWS Bedrock — when Claude Code itself is running on Bedrock.
 //   3. Anthropic API / Claude Code OAuth — the original default.
 function callLLM(systemPrompt, userText) {
   if (externalApiKey()) {
-    return callOpenAICompatible(systemPrompt, userText);
+    return callExternalLLM(systemPrompt, userText);
   }
   if (process.env.CLAUDE_CODE_USE_BEDROCK === "1") {
     return callHaikuBedrock(systemPrompt, userText);
@@ -90,26 +90,37 @@ function callLLM(systemPrompt, userText) {
   return callHaikuAnthropic(systemPrompt, userText);
 }
 
-// OpenAI-compatible path — DeepSeek, OpenAI, Kimi, Qwen, GLM, etc.
+// External chat-completions path — DeepSeek, Kimi, Qwen, GLM, etc.
 // Calls <base>/chat/completions synchronously via curl, mirroring the
 // Anthropic path below (the claude CLI deadlocks when spawned inside hooks).
-function callOpenAICompatible(systemPrompt, userText) {
+function callExternalLLM(systemPrompt, userText) {
   const key = externalApiKey();
   if (!key) return null;
 
-  const body = buildOpenAIBody({
+  const body = buildChatBody({
     model: externalModel(),
     systemPrompt,
     userText,
   });
 
-  const result = spawnSync("curl", [
-    "-s", "--max-time", "30",
-    `${externalBaseUrl()}/chat/completions`,
-    "-H", "content-type: application/json",
-    "-H", `Authorization: Bearer ${key}`,
-    "-d", body,
-  ], { encoding: "utf8", timeout: 35_000 });
+  // Keep the bearer token out of the process list: curl's argv is visible via
+  // `ps`, so the Authorization header is written to a 0600 temp file and read
+  // back with `-K`. The prompt body stays on argv (it is not a secret).
+  const cfgFile = path.join(os.tmpdir(), `ceb-${process.pid}-${Date.now()}.cfg`);
+  fs.writeFileSync(cfgFile, `header = "Authorization: Bearer ${key}"\n`, { mode: 0o600 });
+
+  let result;
+  try {
+    result = spawnSync("curl", [
+      "-s", "--max-time", "30",
+      "-K", cfgFile,
+      "-H", "content-type: application/json",
+      "-d", body,
+      `${externalBaseUrl()}/chat/completions`,
+    ], { encoding: "utf8", timeout: 35_000 });
+  } finally {
+    try { fs.unlinkSync(cfgFile); } catch {}
+  }
 
   if (result.error || result.status !== 0) return null;
 
@@ -118,7 +129,7 @@ function callOpenAICompatible(systemPrompt, userText) {
     if (response.error) {
       const code = response.error?.type || response.error?.code || "";
       if (/auth|invalid|401|403/i.test(String(code))) {
-        authWarning = "[claude-english-buddy] External LLM authentication failed. Check OPENAI_API_KEY / DEEPSEEK_API_KEY.";
+        authWarning = "[claude-english-buddy] External LLM authentication failed. Check ENGLISH_BUDDY_API_KEY.";
       }
       return null;
     }
