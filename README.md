@@ -1,8 +1,11 @@
 # claude-english-buddy
 
-[![Validated by NLPM](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/xiaolai/claude-english-buddy-for-claude/main/nlpm-badge.json)](https://github.com/xiaolai/claude-english-buddy-for-claude/blob/main/nlpm-badge.json)
-
 English language coach for non-native speakers who use Claude Code daily.
+
+> **This is a fork** of [xiaolai/claude-english-buddy-for-claude](https://github.com/xiaolai/claude-english-buddy-for-claude),
+> modified to support **external LLM API keys** (DeepSeek, Kimi, Qwen, GLM, …)
+> so the auto-correct / translate hook works **without a Claude subscription**.
+> Everything else is unchanged from upstream.
 
 ## The Problem
 
@@ -81,11 +84,6 @@ export ENGLISH_BUDDY_BASE_URL=https://api.deepseek.com/v1
 export ENGLISH_BUDDY_MODEL=deepseek-chat
 ```
 
-> This is a fork of [xiaolai/claude-english-buddy-for-claude](https://github.com/xiaolai/claude-english-buddy-for-claude),
-> modified to support external LLM API keys (DeepSeek / Kimi / Qwen / GLM / …)
-> instead of requiring a Claude subscription. The original upstream is at
-> [xiaolai/claude-english-buddy-for-claude](https://github.com/xiaolai/claude-english-buddy-for-claude).
-
 ## Commands
 
 | Command | Description |
@@ -133,21 +131,6 @@ You're improving. Error rate down 37% in 3 weeks.
 
 ## Configuration
 
-### Project config (`.claude-english-buddy.json`)
-
-```json
-{
-  "auto_correct": true,
-  "summary_language": "Chinese",
-  "strictness": "standard",
-  "domain_terms": ["Tailscale", "Headscale", "MagicDNS"]
-}
-```
-
-### Global config (`~/.claude/hooks/prompt_coach.json`)
-
-Same format. Project config overrides global.
-
 ### External LLM (no Claude subscription required)
 
 The hook's correction/translation/refine calls can run on **any provider that
@@ -190,6 +173,27 @@ export ENGLISH_BUDDY_MODEL=qwen-plus
 Provider routing order: external key (`ENGLISH_BUDDY_API_KEY`) → Bedrock →
 Anthropic / Claude Code OAuth. Setting an external key is all you need;
 existing Claude-membership users are unaffected.
+
+> **Security note.** The API key is sent only over HTTPS to the provider you
+> configure, and is never written into a git repo. The hook also passes the key
+> to `curl` via a `0600` temp file rather than a command-line argument, so it
+> does not appear in the process list. Store it in `~/.claude/settings.json`
+> `env` (keep the file at `0600`) or your shell profile.
+
+### Project config (`.claude-english-buddy.json`)
+
+```json
+{
+  "auto_correct": true,
+  "summary_language": "Chinese",
+  "strictness": "standard",
+  "domain_terms": ["Tailscale", "Headscale", "MagicDNS"]
+}
+```
+
+### Global config (`~/.claude/hooks/prompt_coach.json`)
+
+Same format. Project config overrides global.
 
 ### AWS Bedrock
 
@@ -250,7 +254,7 @@ The goal is not perfection. The goal is **visible progress** — seeing your err
 ## Tests
 
 ```bash
-npm test    # 22 tests covering detection, state, and stats
+npm test    # 42 tests covering detection, state, stats, and provider resolution
 ```
 
 ## License
