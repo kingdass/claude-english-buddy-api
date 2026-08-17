@@ -250,11 +250,13 @@ The goal is not perfection. The goal is **visible progress** — seeing your err
 | `scripts/lib/detect.mjs` | Language detection (ASCII ratio) |
 | `scripts/lib/stats.mjs` | Trend analysis and pattern extraction |
 | `scripts/lib/provider.mjs` | External LLM provider resolution (chat-completions) |
+| `scripts/lib/auth.mjs` | Credential resolution + auth-header construction |
+| `scripts/lib/transport.mjs` | Shared curl transport + response parsing |
 
 ## Tests
 
 ```bash
-npm test    # 42 tests covering detection, state, stats, and provider resolution
+npm test    # 52 tests covering detection, state, stats, auth, transport, and provider resolution
 ```
 
 ## License

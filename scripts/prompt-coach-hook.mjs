@@ -17,6 +17,12 @@ import {
   buildChatBody,
 } from "./lib/provider.mjs";
 import {
+  anthropicCredentials,
+  anthropicAuthHeader,
+  writeBearerConfigFile,
+} from "./lib/auth.mjs";
+import { postJson, parseResponse } from "./lib/transport.mjs";
+import {
   parseAnnotations,
   formatAnnotationsForStorage,
   formatAnnotationsForDisplay,
@@ -45,34 +51,6 @@ function emitFallback(summaryCtx) {
   }
 }
 
-// Resolve API credentials with macOS keychain fallback.
-// Order: CLAUDE_CODE_OAUTH_TOKEN → ANTHROPIC_API_KEY → macOS keychain.
-// Returns { token, expired } or null.
-function getCredentials() {
-  const envOauth = process.env.CLAUDE_CODE_OAUTH_TOKEN;
-  if (envOauth) return { token: envOauth, expired: false };
-
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (apiKey) return { token: apiKey, expired: false };
-
-  if (process.platform !== "darwin") return null;
-
-  const result = spawnSync("security", [
-    "find-generic-password", "-s", "Claude Code-credentials", "-w",
-  ], { encoding: "utf8", timeout: 5_000 });
-  if (result.error || result.status !== 0) return null;
-
-  try {
-    const creds = JSON.parse(result.stdout.trim());
-    const token = creds?.claudeAiOauth?.accessToken;
-    const expiresAt = creds?.claudeAiOauth?.expiresAt;
-    if (!token) return null;
-    return { token, expired: Boolean(expiresAt && Date.now() > expiresAt) };
-  } catch {
-    return null;
-  }
-}
-
 // Route the correction/translation/refine call to the right provider.
 // Priority:
 //   1. External chat-completions API (DeepSeek by default) — when
@@ -91,58 +69,36 @@ function callLLM(systemPrompt, userText) {
 }
 
 // External chat-completions path — DeepSeek, Kimi, Qwen, GLM, etc.
-// Calls <base>/chat/completions synchronously via curl, mirroring the
-// Anthropic path below (the claude CLI deadlocks when spawned inside hooks).
 function callExternalLLM(systemPrompt, userText) {
   const key = externalApiKey();
   if (!key) return null;
 
-  const body = buildChatBody({
-    model: externalModel(),
-    systemPrompt,
-    userText,
-  });
-
-  // Keep the bearer token out of the process list: curl's argv is visible via
-  // `ps`, so the Authorization header is written to a 0600 temp file and read
-  // back with `-K`. The prompt body stays on argv (it is not a secret).
-  const cfgFile = path.join(os.tmpdir(), `ceb-${process.pid}-${Date.now()}.cfg`);
-  fs.writeFileSync(cfgFile, `header = "Authorization: Bearer ${key}"\n`, { mode: 0o600 });
-
-  let result;
+  // Keep the bearer token out of the process list (curl's argv is visible via
+  // `ps`): it's written to a 0600 temp file and read back with `-K`.
+  const cfgFile = writeBearerConfigFile(key);
   try {
-    result = spawnSync("curl", [
-      "-s", "--max-time", "30",
-      "-K", cfgFile,
-      "-H", "content-type: application/json",
-      "-d", body,
-      `${externalBaseUrl()}/chat/completions`,
-    ], { encoding: "utf8", timeout: 35_000 });
+    const stdout = postJson({
+      url: `${externalBaseUrl()}/chat/completions`,
+      headers: ["content-type: application/json"],
+      configFile: cfgFile,
+      body: buildChatBody({ model: externalModel(), systemPrompt, userText }),
+    });
+    const { text, authError } = parseResponse({
+      stdout,
+      extractText: (r) => r.choices?.[0]?.message?.content,
+      isAuthError: (e) => /auth|invalid|401|403/i.test(String(e?.type || e?.code || "")),
+    });
+    if (authError) {
+      authWarning = "[claude-english-buddy] External LLM authentication failed. Check ENGLISH_BUDDY_API_KEY.";
+    }
+    return text;
   } finally {
     try { fs.unlinkSync(cfgFile); } catch {}
-  }
-
-  if (result.error || result.status !== 0) return null;
-
-  try {
-    const response = JSON.parse(result.stdout);
-    if (response.error) {
-      const code = response.error?.type || response.error?.code || "";
-      if (/auth|invalid|401|403/i.test(String(code))) {
-        authWarning = "[claude-english-buddy] External LLM authentication failed. Check ENGLISH_BUDDY_API_KEY.";
-      }
-      return null;
-    }
-    const text = response.choices?.[0]?.message?.content;
-    return (typeof text === "string" ? text : "").trim() || null;
-  } catch {
-    return null;
   }
 }
 
 function callHaikuAnthropic(systemPrompt, userText) {
-  // Note: claude CLI deadlocks when spawned inside hooks, so we call the API directly via curl.
-  const creds = getCredentials();
+  const creds = anthropicCredentials();
   if (!creds) return null;
 
   if (creds.expired) {
@@ -150,43 +106,30 @@ function callHaikuAnthropic(systemPrompt, userText) {
     return null;
   }
 
-  // OAuth tokens (sk-ant-oat...) require Authorization: Bearer; API keys use x-api-key.
-  const authHeader = creds.token.startsWith("sk-ant-oat")
-    ? `Authorization: Bearer ${creds.token}`
-    : `x-api-key: ${creds.token}`;
-
-  const body = JSON.stringify({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 1024,
-    system: systemPrompt,
-    messages: [{ role: "user", content: userText }],
+  const stdout = postJson({
+    url: "https://api.anthropic.com/v1/messages",
+    headers: [
+      "content-type: application/json",
+      anthropicAuthHeader(creds.token),
+      "anthropic-version: 2023-06-01",
+    ],
+    body: JSON.stringify({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userText }],
+    }),
   });
 
-  // Synchronous HTTP via curl — can't use claude CLI (deadlocks inside hooks)
-  const result = spawnSync("curl", [
-    "-s", "--max-time", "30",
-    "https://api.anthropic.com/v1/messages",
-    "-H", "content-type: application/json",
-    "-H", authHeader,
-    "-H", "anthropic-version: 2023-06-01",
-    "-d", body,
-  ], { encoding: "utf8", timeout: 35_000 });
-
-  if (result.error || result.status !== 0) return null;
-
-  try {
-    const response = JSON.parse(result.stdout);
-    if (response.error) {
-      if (response.error.type === "authentication_error") {
-        authWarning = "[claude-english-buddy] Authentication failed. If you authenticate via `claude setup-token`, restart Claude Code to refresh the OAuth token.";
-      }
-      return null;
-    }
-    const text = response.content?.[0]?.text || "";
-    return text.trim() || null;
-  } catch {
-    return null;
+  const { text, authError } = parseResponse({
+    stdout,
+    extractText: (r) => r.content?.[0]?.text || "",
+    isAuthError: (e) => e?.type === "authentication_error",
+  });
+  if (authError) {
+    authWarning = "[claude-english-buddy] Authentication failed. If you authenticate via `claude setup-token`, restart Claude Code to refresh the OAuth token.";
   }
+  return text;
 }
 
 // AWS Bedrock path — used when CLAUDE_CODE_USE_BEDROCK=1.

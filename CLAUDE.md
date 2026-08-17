@@ -50,11 +50,15 @@ scripts/
     state.mjs           Correction history (JSONL per day)
     stats.mjs           Trend analysis and pattern extraction
     provider.mjs        External LLM provider resolution (chat-completions)
+    auth.mjs            Credential resolution + auth-header construction
+    transport.mjs       Shared curl transport + response parsing
 tests/
   detect.test.mjs       Language detection tests
   state.test.mjs        State persistence tests
   stats.test.mjs        Stats computation tests
   provider.test.mjs     External provider env resolution + body building tests
+  auth.test.mjs         Credential / auth-header tests
+  transport.test.mjs    Response parsing tests
 package.json            Node.js project config
 ```
 
@@ -78,6 +82,11 @@ priority:
 1. **External chat-completions API** — when `ENGLISH_BUDDY_API_KEY` is set. Base URL and model come from `ENGLISH_BUDDY_BASE_URL` / `ENGLISH_BUDDY_MODEL` (DeepSeek defaults). See `scripts/lib/provider.mjs`.
 2. **Bedrock** — when `CLAUDE_CODE_USE_BEDROCK=1`.
 3. **Anthropic** — OAuth / `ANTHROPIC_API_KEY` / macOS keychain (original default).
+
+Credential resolution and auth headers live in `scripts/lib/auth.mjs`; the shared
+curl transport and response parsing live in `scripts/lib/transport.mjs`. The
+provider callers in the hook only assemble provider-specific config and delegate
+to those two modules.
 
 ### State storage
 
