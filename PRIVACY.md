@@ -8,12 +8,13 @@ claude-english-buddy is a Claude Code plugin that auto-corrects English mistakes
 
 For every prompt you submit while the hook is active, the hook sends the prompt text to a Large Language Model so it can suggest corrections:
 
-- **Default path**: `https://api.anthropic.com/v1/messages` (Anthropic API)
+- **External path** (when `OPENAI_API_KEY` / `DEEPSEEK_API_KEY` is set): the OpenAI-compatible endpoint configured by `OPENAI_BASE_URL` (default `https://api.deepseek.com/v1/chat/completions`).
+- **Anthropic path**: `https://api.anthropic.com/v1/messages` (Anthropic API)
 - **Bedrock path** (when `CLAUDE_CODE_USE_BEDROCK=1`): AWS Bedrock `bedrock-runtime:InvokeModel`
 
-The transmission uses **your own credentials** — `CLAUDE_CODE_OAUTH_TOKEN`, `ANTHROPIC_API_KEY`, or the OAuth token in your macOS keychain. The plugin does **not** have, and does **not** use, a centralized API key.
+The transmission uses **your own credentials** — `OPENAI_API_KEY` / `DEEPSEEK_API_KEY`, `CLAUDE_CODE_OAUTH_TOKEN`, `ANTHROPIC_API_KEY`, or the OAuth token in your macOS keychain. The plugin does **not** have, and does **not** use, a centralized API key.
 
-Anthropic's privacy policy applies to data sent through the Anthropic API. AWS's privacy policy applies to data sent through Bedrock.
+The privacy policy of the provider you configure applies to data sent through that provider (e.g. DeepSeek, OpenAI, Kimi). Anthropic's privacy policy applies to data sent through the Anthropic API. AWS's privacy policy applies to data sent through Bedrock.
 
 ## What is stored locally
 
@@ -35,6 +36,7 @@ The plugin maintainer (xiaolai) does **not** see, log, store, or aggregate any u
 
 ## Third parties
 
+- **Your configured external provider** (optional) — when `OPENAI_API_KEY` / `DEEPSEEK_API_KEY` is set, prompt text is sent to the endpoint in `OPENAI_BASE_URL` (e.g. DeepSeek `api.deepseek.com`, OpenAI `api.openai.com`, Kimi `api.moonshot.cn`).
 - **Anthropic** (`api.anthropic.com`) — receives the text of prompts you submit, for the purpose of generating corrections. Anthropic's privacy policy: <https://www.anthropic.com/legal/privacy>
 - **AWS Bedrock** (optional, only when `CLAUDE_CODE_USE_BEDROCK=1`) — alternative routing for the same prompt text. AWS's privacy policy: <https://aws.amazon.com/privacy/>
 

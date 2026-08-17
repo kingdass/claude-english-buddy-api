@@ -49,10 +49,12 @@ scripts/
     detect.mjs          Language detection (ASCII ratio heuristic)
     state.mjs           Correction history (JSONL per day)
     stats.mjs           Trend analysis and pattern extraction
+    provider.mjs        External LLM (OpenAI-compatible) provider resolution
 tests/
   detect.test.mjs       Language detection tests
   state.test.mjs        State persistence tests
   stats.test.mjs        Stats computation tests
+  provider.test.mjs     External provider env resolution + body building tests
 package.json            Node.js project config
 ```
 
@@ -67,6 +69,15 @@ The UserPromptSubmit hook has four modes:
 - **skip**: slash commands, short prompts, code patterns → exit 0
 
 All modes inject corrected/translated text into `additionalContext` so Claude acts on the clean version. If `summary_language` is configured, the summary instruction is appended to `additionalContext` in all modes.
+
+### Provider routing
+
+The hook's LLM call (`callLLM` in `scripts/prompt-coach-hook.mjs`) routes by
+priority:
+
+1. **External OpenAI-compatible API** — when `OPENAI_API_KEY` / `DEEPSEEK_API_KEY` is set. Base URL and model come from `OPENAI_BASE_URL` / `ENGLISH_BUDDY_MODEL` (DeepSeek defaults). See `scripts/lib/provider.mjs`.
+2. **Bedrock** — when `CLAUDE_CODE_USE_BEDROCK=1`.
+3. **Anthropic** — OAuth / `ANTHROPIC_API_KEY` / macOS keychain (original default).
 
 ### State storage
 

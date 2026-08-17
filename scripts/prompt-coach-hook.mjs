@@ -11,6 +11,12 @@ import process from "node:process";
 import { detectMode } from "./lib/detect.mjs";
 import { logCorrection, logClean, resolveConfig } from "./lib/state.mjs";
 import {
+  externalApiKey,
+  externalBaseUrl,
+  externalModel,
+  buildOpenAIBody,
+} from "./lib/provider.mjs";
+import {
   parseAnnotations,
   formatAnnotationsForStorage,
   formatAnnotationsForDisplay,
@@ -67,13 +73,60 @@ function getCredentials() {
   }
 }
 
-// Route to Bedrock when Claude Code itself is running on Bedrock
-// (CLAUDE_CODE_USE_BEDROCK=1). Otherwise use the Anthropic API.
-function callHaiku(systemPrompt, userText) {
+// Route the correction/translation/refine call to the right provider.
+// Priority:
+//   1. External OpenAI-compatible API (DeepSeek by default) — when
+//      OPENAI_API_KEY or DEEPSEEK_API_KEY is set. This lets the plugin run on
+//      any external LLM key instead of requiring a Claude subscription.
+//   2. AWS Bedrock — when Claude Code itself is running on Bedrock.
+//   3. Anthropic API / Claude Code OAuth — the original default.
+function callLLM(systemPrompt, userText) {
+  if (externalApiKey()) {
+    return callOpenAICompatible(systemPrompt, userText);
+  }
   if (process.env.CLAUDE_CODE_USE_BEDROCK === "1") {
     return callHaikuBedrock(systemPrompt, userText);
   }
   return callHaikuAnthropic(systemPrompt, userText);
+}
+
+// OpenAI-compatible path — DeepSeek, OpenAI, Kimi, Qwen, GLM, etc.
+// Calls <base>/chat/completions synchronously via curl, mirroring the
+// Anthropic path below (the claude CLI deadlocks when spawned inside hooks).
+function callOpenAICompatible(systemPrompt, userText) {
+  const key = externalApiKey();
+  if (!key) return null;
+
+  const body = buildOpenAIBody({
+    model: externalModel(),
+    systemPrompt,
+    userText,
+  });
+
+  const result = spawnSync("curl", [
+    "-s", "--max-time", "30",
+    `${externalBaseUrl()}/chat/completions`,
+    "-H", "content-type: application/json",
+    "-H", `Authorization: Bearer ${key}`,
+    "-d", body,
+  ], { encoding: "utf8", timeout: 35_000 });
+
+  if (result.error || result.status !== 0) return null;
+
+  try {
+    const response = JSON.parse(result.stdout);
+    if (response.error) {
+      const code = response.error?.type || response.error?.code || "";
+      if (/auth|invalid|401|403/i.test(String(code))) {
+        authWarning = "[claude-english-buddy] External LLM authentication failed. Check OPENAI_API_KEY / DEEPSEEK_API_KEY.";
+      }
+      return null;
+    }
+    const text = response.choices?.[0]?.message?.content;
+    return (typeof text === "string" ? text : "").trim() || null;
+  } catch {
+    return null;
+  }
 }
 
 function callHaikuAnthropic(systemPrompt, userText) {
@@ -249,7 +302,7 @@ function main() {
       return;
     }
 
-    const result = callHaiku(SYSTEM_REFINE, detection.text);
+    const result = callLLM(SYSTEM_REFINE, detection.text);
     if (!result) {
       emit({ decision: "block", reason: "Refinement failed." });
       return;
@@ -269,7 +322,7 @@ function main() {
   }
 
   if (detection.mode === "translate") {
-    const result = callHaiku(SYSTEM_TRANSLATE, detection.text);
+    const result = callLLM(SYSTEM_TRANSLATE, detection.text);
     if (!result) {
       emitFallback(summaryCtx);
       return;
@@ -294,7 +347,7 @@ function main() {
     : "";
   const system = SYSTEM_CORRECT + domainTerms;
 
-  const result = callHaiku(system, detection.text);
+  const result = callLLM(system, detection.text);
   if (!result) {
     emitFallback(summaryCtx);
     return;

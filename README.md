@@ -139,6 +139,43 @@ You're improving. Error rate down 37% in 3 weeks.
 
 Same format. Project config overrides global.
 
+### External LLM (no Claude subscription required)
+
+The hook's correction/translation/refine calls can run on **any
+OpenAI-compatible API** — DeepSeek, OpenAI, Kimi/Moonshot, Qwen, GLM, etc. —
+so you don't need a Claude subscription or an Anthropic API key. Set these
+environment variables:
+
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| `OPENAI_API_KEY` | Your external LLM API key | — |
+| `DEEPSEEK_API_KEY` | Alias, used only if `OPENAI_API_KEY` is unset | — |
+| `OPENAI_BASE_URL` | Base URL of the compatible endpoint | `https://api.deepseek.com/v1` |
+| `ENGLISH_BUDDY_MODEL` | Model name | `deepseek-chat` |
+
+Examples:
+
+```bash
+# DeepSeek
+export OPENAI_API_KEY=sk-xxxxxxxx
+export OPENAI_BASE_URL=https://api.deepseek.com/v1
+export ENGLISH_BUDDY_MODEL=deepseek-chat
+
+# OpenAI
+export OPENAI_API_KEY=sk-xxxxxxxx
+export OPENAI_BASE_URL=https://api.openai.com/v1
+export ENGLISH_BUDDY_MODEL=gpt-4o-mini
+
+# Kimi / Moonshot
+export OPENAI_API_KEY=sk-xxxxxxxx
+export OPENAI_BASE_URL=https://api.moonshot.cn/v1
+export ENGLISH_BUDDY_MODEL=kimi-latest
+```
+
+Provider routing order: external key (`OPENAI_API_KEY` / `DEEPSEEK_API_KEY`)
+→ Bedrock → Anthropic / Claude Code OAuth. Setting an external key is all you
+need; existing Claude-membership users are unaffected.
+
 ### AWS Bedrock
 
 If Claude Code itself is running on Bedrock (`CLAUDE_CODE_USE_BEDROCK=1`), the
@@ -193,6 +230,7 @@ The goal is not perfection. The goal is **visible progress** — seeing your err
 | `scripts/lib/state.mjs` | JSONL correction history per day |
 | `scripts/lib/detect.mjs` | Language detection (ASCII ratio) |
 | `scripts/lib/stats.mjs` | Trend analysis and pattern extraction |
+| `scripts/lib/provider.mjs` | External LLM (OpenAI-compatible) provider resolution |
 
 ## Tests
 
